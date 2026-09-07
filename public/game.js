@@ -965,6 +965,26 @@ function ospiteDi() { return S.ospite && png(S.ospite.id); }
 function relazioniTxt(p) { const altri = S.png.filter(x => x.id !== p.id && x.aff >= 45).slice(0, 4).map(x => `${x.nome} (${ruoloTxt(x)}, affinità ${x.aff})`); return altri.length ? altri.join(', ') : 'nessuno di rilievo'; }
 function memoriaTxt(p) { const m = (p.mem || []).slice(-6); return m.length ? m.join(' | ') : 'niente di particolare'; }
 function vociTxt(p) { const v = (S.voci || []).filter(x => x.su !== p.id).slice(-4).map(x => `${x.da}: "${x.txt}"`); return v.length ? v.join(' | ') : 'nessuna'; }
+function azioneGiocatore(p, testo) {
+  // Interpreta la parte MECCANICA dell'azione del giocatore (soldi, oggetti, violenza) con conseguenze reali; il resto lo interpreta l'AI.
+  const t = testo.toLowerCase(); const eff = []; let nota = '';
+  const soldi = t.match(/(\d[\d.\s]*)\s*(?:ar|ariary|mila)?/); let n = soldi ? parseInt(soldi[1].replace(/[.\s]/g, '')) : 0; if (/mila/.test(t) && n < 1000) n *= 1000;
+  if (n > 0 && /d[oò]|dare|pago|pagare|offro|regal|prest|restitu|rendo|donne|paie|offre|prête|rends|rembourse/.test(t)) {
+    if (S.soldi < n) { nota = `NON HA ABBASTANZA SOLDI: ha solo ${Ar(S.soldi)} Ar, l'azione fallisce`; eff.push(`Non hai ${Ar(n)} Ar (hai ${Ar(S.soldi)} Ar).`); }
+    else { const m = -trasferisci(p, -n, 'dal giocatore'); if (p.debito) { const r = Math.min(p.debito, m); p.debito -= r; if (!p.debito) { p.aff = clamp(p.aff + 6); ricorda(p, 'mi ha restituito i soldi, persona seria'); } else ricorda(p, `mi ha restituito ${Ar(r)} Ar, ne mancano ${Ar(p.debito)}`); } else if (p.richiesta && m >= p.richiesta) { p.richiesta = 0; p.aff = clamp(p.aff + 4); ricorda(p, `mi ha dato i ${Ar(m)} Ar che avevo chiesto`); } else { p.aff = clamp(p.aff + Math.min(8, Math.round(m / 5000))); p.favoriRicevuti = (p.favoriRicevuti || 0) + 1; ricorda(p, `mi ha dato ${Ar(m)} Ar`); }
+      nota = `HA DAVVERO CONSEGNATO ${Ar(m)} Ar: ora li hai in tasca`; eff.push(`💸 Hai dato ${Ar(m)} Ar a ${p.nome}.`); S.eco.spesaGiocatore += m; }
+  }
+  else if (n > 0 && /chied|chiedo|presta(mi)?|puoi darmi|demande|prête-moi|peux-tu me donner/.test(t)) nota = `TI CHIEDE ${Ar(n)} Ar: decidi tu in base ai tuoi soldi e all'affinità (usa PRESTA:n o REGALA:n solo se vuoi davvero)`;
+  if (/picchi|schiaff|pugno|colpisc|spingo|aggred|frappe|gifle|coup de poing|bouscule/.test(t)) { p.aff = clamp(p.aff - 30); ricorda(p, 'MI HA AGGREDITO/A fisicamente'); S.bis.umore = clamp(S.bis.umore - 5); nota = 'TI HA AGGREDITO FISICAMENTE'; eff.push(`⚠️ Hai aggredito ${p.nome}: affinità -30, rischio denuncia.`); if (Math.random() < 0.5) { S.fedina = (S.fedina || 0) + 1; const multa = Math.min(S.soldi, 50000); S.soldi -= multa; eff.push(`🚔 Denunciato/a: multa ${Ar(multa)} Ar, fedina sporca.`); } spargiVoce(p, 'è violento/a, attenzione'); }
+  else if (/rub|frego|scipp|vole|pique/.test(t)) { if (Math.random() < 0.4 && p.eco && p.eco.soldi > 0) { const m = Math.min(p.eco.soldi, rnd(2000, 20000)); trasferisci(p, m, 'furto subito'); nota = `GLI HAI RUBATO ${Ar(m)} Ar senza che se ne accorgesse (lui/lei NON lo sa)`; eff.push(`🕵️ Hai rubato ${Ar(m)} Ar a ${p.nome}.`); } else { p.aff = clamp(p.aff - 40); ricorda(p, 'HA PROVATO A DERUBARMI'); S.fedina = (S.fedina || 0) + 1; nota = 'TI HA BECCATO MENTRE PROVAVA A DERUBARTI'; eff.push(`🚔 Beccato/a a rubare a ${p.nome}: affinità -40, fedina sporca.`); spargiVoce(p, 'è un ladro/una ladra'); } }
+  else if (/abbracc|bacio|bacia|mano nella|enlace|embrasse|bise/.test(t)) { if (p.aff >= 45 || (p.rom || 0) >= 30) { p.rom = clamp((p.rom || 0) + 6); p.aff = clamp(p.aff + 2); nota = 'gesto affettuoso gradito'; } else { p.aff = clamp(p.aff - 8); nota = 'GESTO FISICO NON GRADITO: troppo presto, si ritrae'; } }
+  else if (/regalo|regal|offro (un|una|del|il)|offre (un|une|du)/.test(t) && !n) { const c = /gioiell|bijou|telefono|téléphone/.test(t) ? 200000 : /fiori|fleurs|birra|bière|caff|pasto|repas|brochette|mofo|riso|riz/.test(t) ? 5000 : 15000; if (S.soldi >= c) { paga(c); movEco(p, Math.round(c * 0.3), 'regalo ricevuto (valore rivendibile)'); p.aff = clamp(p.aff + (c >= 200000 ? 20 : c >= 15000 ? 8 : 4)); nota = `regalo consegnato davvero (ti è costato ${Ar(c)} Ar)`; eff.push(`🎁 Regalo a ${p.nome}: -${Ar(c)} Ar.`); } else { nota = 'VOLEVA FARE UN REGALO MA NON HA I SOLDI: figuraccia'; eff.push('Non hai i soldi per quel regalo.'); } }
+  else if (/cv|curriculum|lavoro|assum|travail|embauch/.test(t) && S.lavoro === 'nulla') nota = 'ti chiede lavoro: se sei un datore di lavoro e ti convince (educazione, esperienza, bisogno), puoi usare ASSUMI';
+  else if (/insult|vaffa|stupid|idiot|merd|con(nard)?\b|imbécile/.test(t)) { p.aff = clamp(p.aff - 12); nota = 'TI HA INSULTATO/A'; }
+  avanza(azioneDurata(t));
+  return { nota, eff };
+}
+function azioneDurata(t) { return /ore|heures/.test(t) ? 120 : /aspett|attend/.test(t) ? 30 : 10; }
 function sistemaPrompt(p) {
   const l = lavoro(); const c = casa(); const h = ora(); const notte = h >= 21 || h < 5;
   const sameJob = ['capo', 'collega'].includes(p.ruolo) && l.id !== 'nulla';
@@ -1010,26 +1030,6 @@ REGOLE: rispondi SEMPRE in italiano (rappresenta il malgascio parlato nella vita
 AZIONI: puoi agire concretamente nel mondo aggiungendo ALLA FINE, ognuno su una propria riga, tag nella forma [NOME] o [NOME:valore]. Usali solo quando è davvero coerente con il carattere, l'affinità e la situazione (raramente, non a ogni messaggio; mai su richiesta insistente se non te la senti). Tag disponibili:
 ${poteri.map(x => '- [' + x.replace(' — ', '] ')).join('\n')}`;
 }
-function azioneGiocatore(p, testo) {
-  // Interpreta la parte MECCANICA dell'azione del giocatore (soldi, oggetti, violenza) con conseguenze reali; il resto lo interpreta l'AI.
-  const t = testo.toLowerCase(); const eff = []; let nota = '';
-  const soldi = t.match(/(\d[\d.\s]*)\s*(?:ar|ariary|mila)?/); let n = soldi ? parseInt(soldi[1].replace(/[.\s]/g, '')) : 0; if (/mila/.test(t) && n < 1000) n *= 1000;
-  if (n > 0 && /d[oò]|dare|pago|pagare|offro|regal|prest|restitu|rendo|donne|paie|offre|prête|rends|rembourse/.test(t)) {
-    if (S.soldi < n) { nota = `NON HA ABBASTANZA SOLDI: ha solo ${Ar(S.soldi)} Ar, l'azione fallisce`; eff.push(`Non hai ${Ar(n)} Ar (hai ${Ar(S.soldi)} Ar).`); }
-    else { const m = -trasferisci(p, -n, 'dal giocatore'); if (p.debito) { const r = Math.min(p.debito, m); p.debito -= r; if (!p.debito) { p.aff = clamp(p.aff + 6); ricorda(p, 'mi ha restituito i soldi, persona seria'); } else ricorda(p, `mi ha restituito ${Ar(r)} Ar, ne mancano ${Ar(p.debito)}`); } else if (p.richiesta && m >= p.richiesta) { p.richiesta = 0; p.aff = clamp(p.aff + 4); ricorda(p, `mi ha dato i ${Ar(m)} Ar che avevo chiesto`); } else { p.aff = clamp(p.aff + Math.min(8, Math.round(m / 5000))); p.favoriRicevuti = (p.favoriRicevuti || 0) + 1; ricorda(p, `mi ha dato ${Ar(m)} Ar`); }
-      nota = `HA DAVVERO CONSEGNATO ${Ar(m)} Ar: ora li hai in tasca`; eff.push(`💸 Hai dato ${Ar(m)} Ar a ${p.nome}.`); S.eco.spesaGiocatore += m; }
-  }
-  else if (n > 0 && /chied|chiedo|presta(mi)?|puoi darmi|demande|prête-moi|peux-tu me donner/.test(t)) nota = `TI CHIEDE ${Ar(n)} Ar: decidi tu in base ai tuoi soldi e all'affinità (usa PRESTA:n o REGALA:n solo se vuoi davvero)`;
-  if (/picchi|schiaff|pugno|colpisc|spingo|aggred|frappe|gifle|coup de poing|bouscule/.test(t)) { p.aff = clamp(p.aff - 30); ricorda(p, 'MI HA AGGREDITO/A fisicamente'); S.bis.umore = clamp(S.bis.umore - 5); nota = 'TI HA AGGREDITO FISICAMENTE'; eff.push(`⚠️ Hai aggredito ${p.nome}: affinità -30, rischio denuncia.`); if (Math.random() < 0.5) { S.fedina = (S.fedina || 0) + 1; const multa = Math.min(S.soldi, 50000); S.soldi -= multa; eff.push(`🚔 Denunciato/a: multa ${Ar(multa)} Ar, fedina sporca.`); } spargiVoce(p, 'è violento/a, attenzione'); }
-  else if (/rub|frego|scipp|vole|pique/.test(t)) { if (Math.random() < 0.4 && p.eco && p.eco.soldi > 0) { const m = Math.min(p.eco.soldi, rnd(2000, 20000)); trasferisci(p, m, 'furto subito'); nota = `GLI HAI RUBATO ${Ar(m)} Ar senza che se ne accorgesse (lui/lei NON lo sa)`; eff.push(`🕵️ Hai rubato ${Ar(m)} Ar a ${p.nome}.`); } else { p.aff = clamp(p.aff - 40); ricorda(p, 'HA PROVATO A DERUBARMI'); S.fedina = (S.fedina || 0) + 1; nota = 'TI HA BECCATO MENTRE PROVAVA A DERUBARTI'; eff.push(`🚔 Beccato/a a rubare a ${p.nome}: affinità -40, fedina sporca.`); spargiVoce(p, 'è un ladro/una ladra'); } }
-  else if (/abbracc|bacio|bacia|mano nella|enlace|embrasse|bise/.test(t)) { if (p.aff >= 45 || (p.rom || 0) >= 30) { p.rom = clamp((p.rom || 0) + 6); p.aff = clamp(p.aff + 2); nota = 'gesto affettuoso gradito'; } else { p.aff = clamp(p.aff - 8); nota = 'GESTO FISICO NON GRADITO: troppo presto, si ritrae'; } }
-  else if (/regalo|regal|offro (un|una|del|il)|offre (un|une|du)/.test(t) && !n) { const c = /gioiell|bijou|telefono|téléphone/.test(t) ? 200000 : /fiori|fleurs|birra|bière|caff|pasto|repas|brochette|mofo|riso|riz/.test(t) ? 5000 : 15000; if (S.soldi >= c) { paga(c); movEco(p, Math.round(c * 0.3), 'regalo ricevuto (valore rivendibile)'); p.aff = clamp(p.aff + (c >= 200000 ? 20 : c >= 15000 ? 8 : 4)); nota = `regalo consegnato davvero (ti è costato ${Ar(c)} Ar)`; eff.push(`🎁 Regalo a ${p.nome}: -${Ar(c)} Ar.`); } else { nota = 'VOLEVA FARE UN REGALO MA NON HA I SOLDI: figuraccia'; eff.push('Non hai i soldi per quel regalo.'); } }
-  else if (/cv|curriculum|lavoro|assum|travail|embauch/.test(t) && S.lavoro === 'nulla') nota = 'ti chiede lavoro: se sei un datore di lavoro e ti convince (educazione, esperienza, bisogno), puoi usare ASSUMI';
-  else if (/insult|vaffa|stupid|idiot|merd|con(nard)?\b|imbécile/.test(t)) { p.aff = clamp(p.aff - 12); nota = 'TI HA INSULTATO/A'; }
-  avanza(azioneDurata(t));
-  return { nota, eff };
-}
-function azioneDurata(t) { return /ore|heures/.test(t) ? 120 : /aspett|attend/.test(t) ? 30 : 10; }
 function fallbackRisposta(p, testo) {
   const t = testo.toLowerCase(); let aff = 0;
   const cortese = /grazie|misaotra|per favore|azafady|salama|buongiorno|ciao|come stai|merci|s'il te|s'il vous|bonjour|salut|ça va|comment vas/.test(t);
