@@ -848,8 +848,8 @@ function renderIntro() {
     if (!ui.introDone && LS.get('mrls_intro') !== '1') return renderCinematic();
   document.body.classList.remove('intro'); document.body.classList.add('start');
   const sel = ui.avatar || AVATARS[0].id; const av = AVATARS.find(a => a.id === sel);
-  $('main').innerHTML = `<div class="hero"><div class="brand"><span>🇲🇬</span><h1>Malagasy Real Life Simulator</h1><p class="mut">Une vraie vie, à partir de zéro, à Antananarivo.</p></div></div>
-  <div class="card"><h3>Ton personnage</h3>
+  $('main').innerHTML = `<div class="hero"><img class="heroimg" src="${ART_BASE}hero.webp" alt="" onerror="this.remove()"><div class="brand"><h1>Malagasy Real Life Simulator</h1><p class="mut">Una vita vera, da zero, ad Antananarivo.</p></div></div>
+  <div class="card"><h3>Il tuo personaggio</h3>
   <div class="avsel">${AVATARS.map(a => `<button class="av ${a.id === sel ? 'on' : ''}" onclick="ui.avatar='${a.id}';render()"><img src="${AVATAR_BASE}${a.id}.jpg" alt=""></button>`).join('')}</div>
   <p class="mut" style="margin:6px 0 10px">${av.desc}</p>
   <input id="iNome" placeholder="Comment tu t'appelles ?" value="${ui.nomeTmp || ''}" oninput="ui.nomeTmp=this.value" autocomplete="off"></div>
@@ -981,7 +981,9 @@ function vBar() { return act('🍻 Soirée au bar', A.bar, `2h30 · ${Ar(prezzo(
 
 function vCitta() {
   let h = `<h2>🗺️ Antananarivo</h2><p class="mut">Tu es à <b>${Q(S.q).nome}</b>. Touche un quartier pour voir les temps et coûts des transports.</p>`;
-  [...QUARTIERI].sort((a, b) => distKm(S.q, a.id) - distKm(S.q, b.id)).forEach(q => { if (q.id === S.q) return; const tag = [haCasa() && casaQ() === q.id ? '🏠 maison' : '', S.lavoro !== 'nulla' && lavoro().luogo === q.id ? '💼 travail' : ''].filter(Boolean).join(' '); h += act(`${q.nome} <span class="mut">${['', '·', '··', '···', '····', '·····'][q.tier]}</span> ${tag}`, () => { ui.modal = { tipo: 'vai', id: q.id }; }, `${distKm(S.q, q.id)} km · ${q.poi.map(p => POI[p].icon).join('')}`); });
+  h += '<div class="qgrid">';
+  [...QUARTIERI].sort((a, b) => distKm(S.q, a.id) - distKm(S.q, b.id)).forEach(q => { if (q.id === S.q) return; const tag = [haCasa() && casaQ() === q.id ? '🏠' : '', S.lavoro !== 'nulla' && lavoro().luogo === q.id ? '💼' : ''].filter(Boolean).join(' '); const id = 'qg' + q.id; setTimeout(() => { const e = $(id); if (e) e.onclick = () => { ui.modal = { tipo: 'vai', id: q.id }; render(); }; }); h += `<div class="qcard" id="${id}"><img src="${ART_BASE}q/${q.id}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><div class="qc"><b>${q.nome}</b> ${tag}<span>${distKm(S.q, q.id)} km · zone ${q.centro ? TIER_LBL[6] : TIER_LBL[q.tier]}</span></div></div>`; });
+  h += '</div>';
   return h;
 }
 function vPersone() {

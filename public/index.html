@@ -5,34 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f1a2b">
+<meta name="theme-color" content="#141a26">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.svg">
 <title>Malagasy Real Life Simulator</title>
 <style>
-:root{--bg:#0f1a2b;--card:#182a44;--card2:#213656;--txt:#e9eef7;--mut:#9fb0c9;--acc:#f0b429;--ok:#3ecf8e;--bad:#ff6b6b;--blue:#4da3ff;--rad:14px}
+:root{--bg:#141a26;--card:#1e2634;--card2:#2a3446;--txt:#f3efe6;--mut:#a9b1bf;--acc:#f5a524;--ok:#4cd39a;--bad:#ff6b6b;--blue:#5aa9ff;--rad:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;height:100%;overscroll-behavior:none}
 body{display:flex;flex-direction:column;height:100dvh}
-header{padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;background:#0b1422;border-bottom:1px solid #223;position:sticky;top:0;z-index:5}
+header{padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;background:#0f141d;border-bottom:1px solid #262f3d;position:sticky;top:0;z-index:5}
 .top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
 .top b{color:var(--acc)}
 .bars{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
 .bar{font-size:10px;color:var(--mut);text-align:center}
-.bar i{display:block;height:5px;background:#2a3d5c;border-radius:3px;margin-top:3px;overflow:hidden}
-.bar i b{display:block;height:100%;background:var(--ok);transition:width .3s}
+.bar i{display:block;height:6px;background:#2a3446;border-radius:3px;margin-top:3px;overflow:hidden}
+.bar i b{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#8be0b8);border-radius:3px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.bar.low i b{background:linear-gradient(90deg,var(--bad),#ff9a8b);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
 .bar.low i b{background:var(--bad)}
 main{flex:1;overflow-y:auto;padding:12px;padding-bottom:calc(70px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0b1422;border-top:1px solid #223;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0f141d;border-top:1px solid #262f3d;padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:10px 0 8px;font-size:11px}
 nav button span{display:block;font-size:20px}
-nav button.on{color:var(--acc)}
-.card{background:var(--card);border-radius:var(--rad);padding:12px;margin-bottom:10px}
+nav button.on{color:var(--acc)}nav button.on span{transform:translateY(-2px) scale(1.15)}nav button span{transition:transform .25s}
+.card{background:var(--card);border-radius:var(--rad);padding:12px;margin-bottom:10px;animation:fadein .35s ease-out both}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .card h3{margin:0 0 8px;font-size:15px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #223;font-size:14px}
 .row:last-child{border:0}
 .mut{color:var(--mut);font-size:12px}
-button.act{background:var(--card2);color:var(--txt);border:0;border-radius:10px;padding:10px 12px;font-size:14px;width:100%;text-align:left;margin:4px 0;display:flex;justify-content:space-between}
+button.act{background:var(--card2);color:var(--txt);border:0;border-radius:12px;padding:11px 12px;font-size:14px;width:100%;text-align:left;margin:4px 0;display:flex;justify-content:space-between;transition:transform .1s,background .2s}
+button.act:active{transform:scale(.985);background:#344058}
 button.act:disabled{opacity:.4}
 button.act small{color:var(--mut)}
 button.pri{background:var(--acc);color:#111;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:600;width:100%;margin:6px 0}
@@ -42,7 +46,7 @@ button.sec{background:var(--card2);color:var(--txt);border:0;border-radius:10px;
 .log div{padding:6px 8px;border-left:3px solid #2a3d5c;margin:4px 0;background:#13223a;border-radius:0 8px 8px 0}
 .log div.good{border-color:var(--ok)}.log div.bad{border-color:var(--bad)}.log div.info{border-color:var(--blue)}
 .tag{display:inline-block;background:#2a3d5c;border-radius:6px;padding:2px 6px;font-size:11px;margin-right:4px}
-input,select,textarea{width:100%;background:#0b1422;color:var(--txt);border:1px solid #2a3d5c;border-radius:8px;padding:10px;font-size:15px;margin:4px 0}
+input,select,textarea{width:100%;background:#0f141d;color:var(--txt);border:1px solid #344058;border-radius:10px;padding:10px;font-size:15px;margin:4px 0}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;z-index:20}
 .modal .box{background:var(--card);width:100%;border-radius:18px 18px 0 0;padding:16px;max-height:85dvh;overflow-y:auto;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 .chat{display:flex;flex-direction:column;gap:6px;margin:8px 0;max-height:45dvh;overflow-y:auto}
@@ -91,7 +95,14 @@ body.intro main{padding:0}
 .ctext h1{font-size:34px;line-height:1.1;margin:0 0 10px;letter-spacing:-.02em;font-weight:700}
 .ctext p{font-size:16px;line-height:1.5;color:#dbe2ec;margin:0 0 18px;max-width:34ch}
 .cta .pri{font-size:17px;padding:15px}
-.hero{padding:26px 8px 12px;text-align:center}
+.hero{padding:0 0 12px;text-align:center}
+.heroimg{width:calc(100% + 24px);margin:-12px -12px 10px;display:block;aspect-ratio:8/5;object-fit:cover;-webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qcard{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:4/3;background:var(--card2);cursor:pointer}
+.qcard img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.qcard:active img{transform:scale(1.05)}
+.qcard .qc{position:absolute;left:0;right:0;bottom:0;padding:22px 9px 7px;background:linear-gradient(180deg,transparent,rgba(15,20,29,.92));font-size:13px;text-shadow:0 1px 4px #000}
+.qcard .qc span{display:block;font-size:11px;color:#d7dce6}
 .brand span{font-size:34px}.brand h1{font-size:24px;margin:6px 0 4px;letter-spacing:-.02em}
 .avsel{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .av{background:none;border:2px solid transparent;border-radius:14px;padding:4px;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px}
