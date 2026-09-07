@@ -1358,6 +1358,7 @@ function vMe() {
   let h = `<h2>🧍 ${S.nome}</h2><div class="card"><div class="row"><span>Âge</span><b>${S.eta}</b></div><div class="row"><span>Études</span><b>${EDU[S.edu]}</b></div><div class="row"><span>Travail</span><b>${lavoro().nome}${S.lavoro !== 'nulla' ? ' · ' + orarioLavoro(lavoro()) + ' ' + giorniTxt(lavoro()) : ''}</b></div><div class="row"><span>Logement</span><b>${casa().nome}</b></div><div class="row"><span>Espèces</span><b>${Ar(S.soldi)} Ar</b></div>${S.banca ? `<div class="row"><span>Banque</span><b>${Ar(S.banca.saldo)} Ar</b></div>` : ''}<div class="row"><span>Patrimoine</span><b>${Ar(S.soldi + (S.banca?.saldo || 0) - (S.banca?.prestito || 0) + S.proprieta.reduce((a, id) => a + CASE.find(c => c.id === id).prezzo, 0) + S.veicoli.reduce((a, id) => a + VEICOLI.find(v => v.id === id).prezzo * 0.7, 0))} Ar</b></div><div class="row"><span>État civil</span><b>${S.sposato ? 'Marié(e)' : S.partner ? 'En couple' : 'Célibataire'}</b></div><div class="row"><span>Jours vécus</span><b>${S.stat.gg}</b></div></div>`;
   h += `<div class="card"><h3>Compétences</h3>${Object.entries(S.skill).map(([k, v]) => `<div class="row"><span style="text-transform:capitalize">${SKILL_LBL[k]}</span><span class="mut">${Math.round(v)}</span></div>`).join('')}</div>`;
   h += `<div class="card"><h3>Ce que tu possèdes</h3><div>${S.mobili.map(id => { const m = MOBILI.find(x => x.id === id); return m ? `<span class="tag">${m.icon} ${m.nome}</span>` : ''; }).join('') || '<span class="mut">Rien.</span>'}</div><div style="margin-top:6px">${S.veicoli.map(id => { const v = VEICOLI.find(x => x.id === id); return `<span class="tag">${v.icon} ${v.nome}</span>`; }).join('')}</div><p class="mut">Garde-manger : ${Object.entries(S.disp).filter(([k, v]) => v > 0).map(([k, v]) => `${NOMI_DISP[k]} ${v}`).join(', ') || 'vide'}. Linge : ${S.pantoPuliti} propres / ${S.pantoSporchi} sales / ${S.pantoBagnati} étendus. Médicaments : ${Object.entries(S.medicine).filter(([k, v]) => v > 0).map(([k, v]) => MEDICINE.find(m => m.id === k).nome + ' x' + v).join(', ') || 'aucun'}</p></div>`;
+  h += musCard();
   h += `<div class="card"><h3>⚙️ Impostazioni AI</h3><p class="mut">Provider attivo: <b id="aiStato">…</b>. Inserisci una chiave gratuita Gemini o Groq (oppure OpenAI/Anthropic) per far parlare i personaggi con l'AI vera.</p><select id="sProv"><option value="auto">Automatico (prima i gratuiti)</option><option value="gemini">Gemini</option><option value="groq">Groq</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option></select><input id="sGemini" placeholder="Google Gemini API key (AIza…) — gratuita"><input id="sGroq" placeholder="Groq API key (gsk_…) — gratuita"><input id="sOpenai" placeholder="OpenAI API key (sk-…)"><input id="sAnth" placeholder="Anthropic API key (sk-ant-…)"><input id="sModel" placeholder="Modello (opzionale, es. gpt-4o-mini)"><input id="sAdmin" type="password" placeholder="Chiave amministratore (solo se il server online la richiede)">${btn('Enregistrer les réglages', salvaImpostazioni, 'sec')}</div>`;
   if (S.ospite) h += `<div class="card"><h3>🛏️ Hébergement</h3><p class="mut">Tu es hébergé(e) par <b>${S.ospite.nome}</b> a ${Q(S.ospite.q).nome} pour encore <b>${S.ospite.gg}</b> nuits. Donne un coup de main à la maison pour ne pas être un poids.</p></div>`;
   const deb = S.png.filter(p => p.debito); if (deb.length) h += `<div class="card"><h3>💵 Dettes envers des amis</h3>${deb.map(p => act(`Rendre ${Ar(p.debito)} Ar à ${p.nome}`, () => A.restituisci(p.id), 'affinité +6')).join('')}</div>`;
@@ -1472,6 +1473,28 @@ function renderModal() {
     $('chatBox').scrollTop = 1e9;
   }
 }
+
+
+/* ---------- MUSICA DI SOTTOFONDO ---------- */
+const MUS = { a: null, b: null, vol: parseFloat(localStorage.getItem('musVol') ?? '0.35'), mute: localStorage.getItem('musMute') === '1', on: false, fade: 3.5 };
+function musInit() {
+  if (MUS.a) return; const mk = () => { const x = new Audio(ART_BASE + 'musica.mp3'); x.preload = 'auto'; x.volume = 0; return x; };
+  MUS.a = mk(); MUS.b = mk(); // due tracce alternate: dissolvenza incrociata sul punto di loop, così il riavvio non si sente
+  const watch = (cur, next) => { cur.addEventListener('timeupdate', () => { if (!MUS.on || !cur.duration) return; const left = cur.duration - cur.currentTime; if (left <= MUS.fade && next.paused && !next._starting) { next._starting = true; next.currentTime = 0; next.play().then(() => { next._starting = false; }).catch(() => { next._starting = false; }); } if (left <= MUS.fade) { const k = Math.max(0, left / MUS.fade); cur.volume = musTarget() * k; next.volume = musTarget() * (1 - k); } }); cur.addEventListener('ended', () => { cur.volume = 0; }); };
+  watch(MUS.a, MUS.b); watch(MUS.b, MUS.a);
+}
+function musTarget() { return MUS.mute ? 0 : MUS.vol; }
+function musStart() { musInit(); if (MUS.on) return; MUS.on = true; MUS.a.volume = 0; MUS.a.play().then(() => { let v = 0; const t = setInterval(() => { v += 0.05; if (v >= 1 || !MUS.on) { clearInterval(t); } MUS.a.volume = musTarget() * Math.min(1, v); }, 100); }).catch(() => { MUS.on = false; }); musUI(); }
+function musApply() { if (!MUS.a) return; const t = musTarget(); [MUS.a, MUS.b].forEach(x => { if (!x.paused) x.volume = Math.min(t, x.volume || t); if (!x.paused && x.duration && x.duration - x.currentTime > MUS.fade) x.volume = t; }); musUI(); }
+function musSetVol(v) { MUS.vol = Math.max(0, Math.min(1, v)); localStorage.setItem('musVol', String(MUS.vol)); if (MUS.vol > 0 && MUS.mute) { MUS.mute = false; localStorage.setItem('musMute', '0'); } musApply(); }
+function musToggle() { MUS.mute = !MUS.mute; localStorage.setItem('musMute', MUS.mute ? '1' : '0'); if (!MUS.on && !MUS.mute) musStart(); musApply(); }
+function musUI() { const b = $('musBtn'); if (b) b.textContent = MUS.mute || !MUS.on ? '🔇' : MUS.vol < 0.4 ? '🔉' : '🔊'; const r = $('musRange'); if (r) r.value = MUS.mute ? 0 : Math.round(MUS.vol * 100); }
+function musCard() { return `<div class="card"><h3>🎵 Musique</h3><div class="row"><span>Volume</span><input type="range" id="musRange" min="0" max="100" value="${MUS.mute ? 0 : Math.round(MUS.vol * 100)}" style="flex:1;margin:0 10px" oninput="musSetVol(this.value/100)"></div>${act(MUS.mute ? '🔊 Réactiver la musique' : '🔇 Couper la musique', () => { musToggle(); render(); })}</div>`; }
+// I browser (soprattutto iPhone) permettono l'audio solo dopo un gesto: la musica parte al primo tocco/click.
+['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { if (!MUS.mute) musStart(); }, { once: true, passive: true }));
+document.addEventListener('DOMContentLoaded', () => { const b = $('musBtn'); if (b) b.onclick = e => { e.stopPropagation(); musToggle(); }; musUI(); });
+document.addEventListener('visibilitychange', () => { if (!MUS.a) return; if (document.hidden) { [MUS.a, MUS.b].forEach(x => { x._wasPlaying = !x.paused; x.pause(); }); } else if (MUS.on) { [MUS.a, MUS.b].forEach(x => { if (x._wasPlaying) x.play().catch(() => {}); }); } });
+window.musSetVol = musSetVol; window.musToggle = musToggle;
 
 /* ---------- AVVIO ---------- */
 window.apriChat = apriChat; window.ui = ui; window.render = render; window.carica = carica; window.toast = toast;
