@@ -31,17 +31,39 @@ function providers() {
   return all; // auto: prima i gratuiti (Gemini, Groq), poi gli altri
 }
 function activeProvider() { return providers()[0] || 'none'; }
+let geminiCache = null, geminiGood = null;
+async function geminiModels() {
+  if (geminiGood) return [geminiGood];
+  if (geminiCache && geminiCache.t > Date.now() - 6 * 3600e3) return geminiCache.list;
+  const fallback = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.0-flash'];
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${settings.geminiKey}`);
+    const j = await r.json();
+    const names = (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
+    const score = n => (/flash/i.test(n) ? 100 : /pro/i.test(n) ? 50 : 0) + (/lite/i.test(n) ? -5 : 0) - (/preview|exp|thinking|tts|image|audio|live|embedding/i.test(n) ? 60 : 0) + parseFloat((n.match(/(\d+(?:\.\d+)?)/) || [0, 0])[1]) * 3;
+    const list = names.filter(n => !/embedding|tts|image|audio|live|aqa/i.test(n)).sort((a, b) => score(b) - score(a));
+    if (list.length) { geminiCache = { t: Date.now(), list: [...new Set([...list.slice(0, 6), ...fallback])] }; return geminiCache.list; }
+  } catch (e) { console.warn('ListModels Gemini:', e.message); }
+  return fallback;
+}
 const cooldown = {}; // provider -> timestamp fino a cui è in pausa (rate limit)
 async function callProvider(p, system, messages) {
   if (p === 'gemini') {
-    const model = (settings.provider === 'gemini' && settings.model) || 'gemini-2.0-flash';
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiKey}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), generationConfig: { maxOutputTokens: 350, temperature: 0.9 }, safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'].map(c => ({ category: c, threshold: 'BLOCK_ONLY_HIGH' })) })
-    });
-    const j = await r.json();
-    if (!r.ok) { const e = new Error(j.error?.message || 'Gemini error'); e.status = r.status; throw e; }
-    return (j.candidates?.[0]?.content?.parts || []).map(x => x.text || '').join('').trim();
+    // Il modello viene scoperto automaticamente da ListModels (Google ritira i vecchi nomi): preferisce i "flash" più recenti.
+    const models = settings.provider === 'gemini' && settings.model ? [settings.model] : await geminiModels();
+    let lastErr = null;
+    for (const model of models) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiKey}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), generationConfig: { maxOutputTokens: 350, temperature: 0.9 }, safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'].map(c => ({ category: c, threshold: 'BLOCK_ONLY_HIGH' })) })
+      });
+      const j = await r.json();
+      if (r.ok) { geminiGood = model; return (j.candidates?.[0]?.content?.parts || []).map(x => x.text || '').join('').trim(); }
+      lastErr = new Error(j.error?.message || 'Gemini error'); lastErr.status = r.status;
+      if (r.status === 404 || /no longer available|not found|not supported/i.test(lastErr.message)) { geminiCache = null; continue; } // modello ritirato: prova il prossimo
+      throw lastErr;
+    }
+    throw lastErr || new Error('Nessun modello Gemini disponibile');
   }
   if (p === 'groq') {
     const model = (settings.provider === 'groq' && settings.model) || 'llama-3.3-70b-versatile';
