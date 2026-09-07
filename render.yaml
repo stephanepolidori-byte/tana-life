@@ -11,11 +11,3 @@ services:
         value: "20"
       - key: ADMIN_KEY
         generateValue: true
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
-    disk:
-      name: saves
-      mountPath: /opt/render/project/src/saves
-      sizeGB: 1
