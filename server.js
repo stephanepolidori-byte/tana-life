@@ -51,16 +51,21 @@ async function callProvider(p, system, messages) {
     // Il modello viene scoperto automaticamente da ListModels (Google ritira i vecchi nomi): preferisce i "flash" più recenti.
     const models = settings.provider === 'gemini' && settings.model ? [settings.model] : await geminiModels();
     let lastErr = null;
-    for (const model of models) {
+    for (const model of models) for (const noThink of [true, false]) {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiKey}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), generationConfig: { maxOutputTokens: 350, temperature: 0.9 }, safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'].map(c => ({ category: c, threshold: 'BLOCK_ONLY_HIGH' })) })
+        body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), generationConfig: { maxOutputTokens: 1200, temperature: 0.9, ...(noThink ? { thinkingConfig: { thinkingBudget: 0 } } : {}) }, safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'].map(c => ({ category: c, threshold: 'BLOCK_ONLY_HIGH' })) })
       });
       const j = await r.json();
-      if (r.ok) { geminiGood = model; return (j.candidates?.[0]?.content?.parts || []).map(x => x.text || '').join('').trim(); }
+      if (r.ok) {
+        const txt = (j.candidates?.[0]?.content?.parts || []).filter(x => !x.thought).map(x => x.text || '').join('').trim();
+        if (txt) { geminiGood = model; return txt; }
+        console.warn('Gemini', model, 'risposta vuota:', JSON.stringify(j).slice(0, 300)); lastErr = new Error('Risposta vuota da ' + model); break; // prova modello successivo
+      }
       lastErr = new Error(j.error?.message || 'Gemini error'); lastErr.status = r.status;
-      if (r.status === 404 || /no longer available|not found|not supported/i.test(lastErr.message)) { geminiCache = null; geminiGood = null; continue; } // modello ritirato: prova il prossimo
-      if (r.status === 429 || r.status === 503) { geminiGood = null; continue; } // sovraccarico/quota: prova un altro modello
+      if (r.status === 404 || /no longer available|not found|not supported/i.test(lastErr.message)) { geminiCache = null; geminiGood = null; break; } // modello ritirato: prova il prossimo
+      if (r.status === 429 || r.status === 503) { geminiGood = null; break; } // sovraccarico/quota: prova un altro modello
+      if (r.status === 400 && noThink && /thinking/i.test(lastErr.message)) continue; // modello senza thinkingConfig: riprova senza
       throw lastErr;
     }
     throw lastErr || new Error('Nessun modello Gemini disponibile');
