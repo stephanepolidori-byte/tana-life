@@ -833,6 +833,7 @@ const AVATARS = [
   { id: 'a5', nome: 'Hery', gen: 'M', desc: 'Costaud, toujours de bonne humeur' },
 ];
 const AVATAR_BASE = (typeof window !== 'undefined' && window.AVATAR_BASE) || '../avatars/';
+const ART_BASE = '../art/';
 const INTRO_VIDEO = '../intro/intro.mp4';
 const INTRO_POSTER = '../intro/c1.jpg';
 const INTRO_SLIDES = [
@@ -898,7 +899,7 @@ function vHome() {
   return (top || '') + vLuogo(q);
 }
 function vQuartiere(q) {
-  let h = `<h2>📍 ${q.nome} <span class="pill">quartier ${q.centro ? TIER_LBL[6] : TIER_LBL[q.tier]}</span></h2><p class="mut">${q.desc} Prix : ×${MULT_CIBO[q.tier]}.</p><div class="card"><h3>Lieux du quartier</h3>`;
+  let h = `<div class="qhero"><img src="${ART_BASE}q/${q.id}.webp" alt="" onerror="this.parentNode.classList.add('noimg')"><div class="qh"><h2>📍 ${q.nome} <span class="pill">quartier ${q.centro ? TIER_LBL[6] : TIER_LBL[q.tier]}</span></h2></div></div><p class="mut">${q.desc} Prix : ×${MULT_CIBO[q.tier]}.</p><div class="card"><h3>Lieux du quartier</h3>`;
   poiDisponibili(q.id).forEach(p => { const d = p === 'attivita' ? { nome: ATTIVITA.find(a => a.id === S.attivita.id).nome, icon: ATTIVITA.find(a => a.id === S.attivita.id).icon } : POI[p]; let sub = d.desc || ''; if (p === 'lavoro') { const st = statoTurno(lavoro()); sub = `${orarioLavoro(lavoro())} · ${st.txt || ''}`; } h += act(`${d.icon} ${d.nome}`, () => entra(p), (p === 'casa' ? '3' : '7') + ' min · ' + sub); });
   h += '</div>';
   { const L = lavorettiOggi(); const rete = (S.flags.rep && S.flags.rep[q.id]) || 0; h += `<div class="card"><h3>🔧 Petits boulots du jour à ${q.nome}</h3><p class="mut">Bouche-à-oreille : ${rete === 0 ? 'personne ne te connaît ici' : rete < 3 ? 'quelques-uns commencent à te connaître' : rete < 8 ? 'on t\'appelle souvent (+1 offre)' : 'tu es l\'homme/la femme à tout faire du quartier (+2 offres, paie +10%)'}${ha('telefono') ? ' · 📱 téléphone : +1 offre' : ' · sans téléphone on ne te trouve qu\'en personne'}. Les offres changent chaque jour et selon le quartier.</p>`;

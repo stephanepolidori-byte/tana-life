@@ -833,6 +833,7 @@ const AVATARS = [
   { id: 'a5', nome: 'Hery', gen: 'M', desc: 'Forte, sempre di buon umore' },
 ];
 const AVATAR_BASE = (typeof window !== 'undefined' && window.AVATAR_BASE) || 'avatars/';
+const ART_BASE = 'art/';
 const INTRO_VIDEO = 'intro/intro.mp4';
 const INTRO_POSTER = 'intro/c1.jpg';
 const INTRO_SLIDES = [
@@ -898,7 +899,7 @@ function vHome() {
   return (top || '') + vLuogo(q);
 }
 function vQuartiere(q) {
-  let h = `<h2>📍 ${q.nome} <span class="pill">zona ${q.centro ? TIER_LBL[6] : TIER_LBL[q.tier]}</span></h2><p class="mut">${q.desc} Prezzi: ×${MULT_CIBO[q.tier]}.</p><div class="card"><h3>Luoghi del quartiere</h3>`;
+  let h = `<div class="qhero"><img src="${ART_BASE}q/${q.id}.webp" alt="" onerror="this.parentNode.classList.add('noimg')"><div class="qh"><h2>📍 ${q.nome} <span class="pill">zona ${q.centro ? TIER_LBL[6] : TIER_LBL[q.tier]}</span></h2></div></div><p class="mut">${q.desc} Prezzi: ×${MULT_CIBO[q.tier]}.</p><div class="card"><h3>Luoghi del quartiere</h3>`;
   poiDisponibili(q.id).forEach(p => { const d = p === 'attivita' ? { nome: ATTIVITA.find(a => a.id === S.attivita.id).nome, icon: ATTIVITA.find(a => a.id === S.attivita.id).icon } : POI[p]; let sub = d.desc || ''; if (p === 'lavoro') { const st = statoTurno(lavoro()); sub = `${orarioLavoro(lavoro())} · ${st.txt || ''}`; } h += act(`${d.icon} ${d.nome}`, () => entra(p), (p === 'casa' ? '3' : '7') + ' min · ' + sub); });
   h += '</div>';
   { const L = lavorettiOggi(); const rete = (S.flags.rep && S.flags.rep[q.id]) || 0; h += `<div class="card"><h3>🔧 Lavoretti di oggi a ${q.nome}</h3><p class="mut">Passaparola: ${rete === 0 ? 'nessuno ti conosce qui' : rete < 3 ? 'qualcuno inizia a conoscerti' : rete < 8 ? 'ti chiamano spesso (+1 offerta)' : 'sei il/la tuttofare del quartiere (+2 offerte, paga +10%)'}${ha('telefono') ? ' · 📱 telefono: +1 offerta' : ' · senza telefono ti trovano solo di persona'}. Le offerte cambiano ogni giorno e per quartiere.</p>`;
