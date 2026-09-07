@@ -33,8 +33,7 @@ function providers() {
 function activeProvider() { return providers()[0] || 'none'; }
 let geminiCache = null, geminiGood = null;
 async function geminiModels() {
-  if (geminiGood) return [geminiGood];
-  if (geminiCache && geminiCache.t > Date.now() - 6 * 3600e3) return geminiCache.list;
+  if (geminiCache && geminiCache.t > Date.now() - 6 * 3600e3) return geminiGood ? [geminiGood, ...geminiCache.list.filter(m => m !== geminiGood)] : geminiCache.list;
   const fallback = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.0-flash'];
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${settings.geminiKey}`);
@@ -60,7 +59,8 @@ async function callProvider(p, system, messages) {
       const j = await r.json();
       if (r.ok) { geminiGood = model; return (j.candidates?.[0]?.content?.parts || []).map(x => x.text || '').join('').trim(); }
       lastErr = new Error(j.error?.message || 'Gemini error'); lastErr.status = r.status;
-      if (r.status === 404 || /no longer available|not found|not supported/i.test(lastErr.message)) { geminiCache = null; continue; } // modello ritirato: prova il prossimo
+      if (r.status === 404 || /no longer available|not found|not supported/i.test(lastErr.message)) { geminiCache = null; geminiGood = null; continue; } // modello ritirato: prova il prossimo
+      if (r.status === 429 || r.status === 503) { geminiGood = null; continue; } // sovraccarico/quota: prova un altro modello
       throw lastErr;
     }
     throw lastErr || new Error('Nessun modello Gemini disponibile');
@@ -110,7 +110,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (req.method === 'OPTIONS') return json(res, 200, {});
   try {
-    if (url.pathname === '/api/health') return json(res, 200, { ok: true, ai: activeProvider() });
+    if (url.pathname === '/api/health') return json(res, 200, { ok: true, ai: activeProvider(), model: geminiGood || null });
 
     if (url.pathname === '/api/settings' && req.method === 'GET')
       return json(res, 200, { provider: settings.provider, model: settings.model, hasGemini: !!settings.geminiKey, hasGroq: !!settings.groqKey, hasOpenai: !!settings.openaiKey, hasAnthropic: !!settings.anthropicKey, active: activeProvider() });
