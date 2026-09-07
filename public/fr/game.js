@@ -232,7 +232,7 @@ const LAVORI = [
   { id: 'mpanasa2', nome: 'Lavandier/ère à domicile (mpanasa lamba)', paga: 6000, tipo: 'giorno', edu: 0, ore: 7, inizio: 6, gg: LS6, luogo: 'analamahitsy', skill: 'casa' },
   { id: 'ricevitore', nome: 'Receveur de taxi-be', paga: 8000, tipo: 'giorno', edu: 0, ore: 10, inizio: 5, gg: LS6, luogo: 'anosy' },
   { id: 'ricevitore2', nome: 'Receveur de taxi-be (ligne Ivato)', paga: 9000, tipo: 'giorno', edu: 0, ore: 12, inizio: 4, gg: TUTTI, luogo: 'ivato' },
-  { id: 'muratore', nome: 'Manœuvre sur chantier', paga: 9000, tipo: 'giorno', edu: 0, ore: 9, inizio: 7, gg: LS6, luogo: 'andoharanofotsy', skill: 'fitness' },
+  { id: 'maçon', nome: 'Manœuvre sur chantier', paga: 9000, tipo: 'giorno', edu: 0, ore: 9, inizio: 7, gg: LS6, luogo: 'andoharanofotsy', skill: 'fitness' },
   { id: 'muratore2', nome: 'Manœuvre sur chantier', paga: 10000, tipo: 'giorno', edu: 0, ore: 9, inizio: 7, gg: LS6, luogo: 'talatamaty', skill: 'fitness' },
   { id: 'facchino', nome: 'Porteur au marché de gros', paga: 10000, tipo: 'giorno', edu: 0, ore: 8, inizio: 4, gg: LS6, luogo: 'anosibe', skill: 'fitness', minSkill: 20 },
   { id: 'mattonaio', nome: 'Briquetier', paga: 7000, tipo: 'giorno', edu: 0, ore: 9, inizio: 6, gg: LS6, luogo: 'alasora', skill: 'fitness' },
@@ -242,7 +242,7 @@ const LAVORI = [
   { id: 'lavapiatti2', nome: 'Plongeur dans un restaurant', paga: 8000, tipo: 'giorno', edu: 0, ore: 8, inizio: 11, gg: MS, luogo: 'tsaralalana', skill: 'casa' },
   { id: 'pousse', nome: 'Tireur de pousse-pousse / cyclo-pousse', paga: 7000, tipo: 'giorno', edu: 0, ore: 10, inizio: 6, gg: TUTTI, luogo: '67ha', skill: 'fitness', minSkill: 25 },
   // --- mensili senza titolo ---
-  { id: 'guardiano', nome: 'Gardien de nuit', paga: 220000, tipo: 'mese', edu: 0, ore: 10, inizio: 20, gg: LS6, luogo: 'ivandry', notte: true },
+  { id: 'gardien', nome: 'Gardien de nuit', paga: 220000, tipo: 'mese', edu: 0, ore: 10, inizio: 20, gg: LS6, luogo: 'ivandry', notte: true },
   { id: 'guardiano2', nome: 'Gardien de nuit', paga: 200000, tipo: 'mese', edu: 0, ore: 11, inizio: 19, gg: LS6, luogo: 'ambatobe', notte: true },
   { id: 'guardiano3', nome: 'Gardien d\'entrepôt', paga: 180000, tipo: 'mese', edu: 0, ore: 12, inizio: 18, gg: LS6, luogo: 'tanjombato', notte: true },
   { id: 'domestica', nome: 'Employé(e) de maison (mpiasa an-trano)', paga: 200000, tipo: 'mese', edu: 0, ore: 8, inizio: 7, gg: LS6, luogo: 'analamahitsy', skill: 'casa', minSkill: 15 },
@@ -261,12 +261,12 @@ const LAVORI = [
   { id: 'commesso2', nome: 'Vendeur/se Jumbo Score', paga: 300000, tipo: 'mese', edu: 1, ore: 8, inizio: 8, gg: MS, luogo: 'tanjombato', skill: 'sociale' },
   { id: 'commesso3', nome: 'Vendeur/se en boutique de tissus', paga: 240000, tipo: 'mese', edu: 1, ore: 10, inizio: 8, gg: LS6, luogo: 'behoririka', skill: 'sociale' },
   { id: 'cuoco', nome: 'Cuisinier/ère d\'hotely', paga: 300000, tipo: 'mese', edu: 1, ore: 10, inizio: 6, gg: LS6, luogo: 'isotry', skill: 'casa', minSkill: 25 },
-  { id: 'sarto', nome: 'Couturier/ère en atelier', paga: 280000, tipo: 'mese', edu: 1, ore: 9, inizio: 8, gg: LS6, luogo: 'behoririka', skill: 'casa', minSkill: 20 },
+  { id: 'tailleur', nome: 'Couturier/ère en atelier', paga: 280000, tipo: 'mese', edu: 1, ore: 9, inizio: 8, gg: LS6, luogo: 'behoririka', skill: 'casa', minSkill: 20 },
   { id: 'autista', nome: 'Chauffeur privé', paga: 500000, tipo: 'mese', edu: 1, ore: 9, inizio: 7, gg: LS6, luogo: 'ivandry', patente: true },
   { id: 'autista2', nome: 'Chauffeur de taxi-be', paga: 400000, tipo: 'mese', edu: 1, ore: 12, inizio: 5, gg: LS6, luogo: 'ambohimanarina', patente: true },
   { id: 'autista3', nome: 'Chauffeur de navette d\'hôtel', paga: 450000, tipo: 'mese', edu: 1, ore: 10, inizio: 5, gg: LS6, luogo: 'ivato', patente: true, skill: 'sociale' },
   { id: 'camionista', nome: 'Camionneur (livraisons RN7)', paga: 550000, tipo: 'mese', edu: 1, ore: 11, inizio: 5, gg: LS6, luogo: 'tanjombato', patente: true, skill: 'guida', minSkill: 30 },
-  { id: 'meccanico', nome: 'Aide-mécanicien', paga: 300000, tipo: 'mese', edu: 1, ore: 9, inizio: 8, gg: LS6, luogo: '67ha', skill: 'guida', minSkill: 15 },
+  { id: 'mécanicien', nome: 'Aide-mécanicien', paga: 300000, tipo: 'mese', edu: 1, ore: 9, inizio: 8, gg: LS6, luogo: '67ha', skill: 'guida', minSkill: 15 },
   { id: 'agentesic', nome: 'Agent de sécurité (société privée)', paga: 300000, tipo: 'mese', edu: 1, ore: 12, inizio: 7, gg: LS6, luogo: 'ankorondrano', skill: 'fitness', minSkill: 30 },
   // --- mensili con BACC ---
   { id: 'callcenter', nome: 'Téléopérateur call center (français)', paga: 550000, tipo: 'mese', edu: 2, ore: 8, inizio: 9, gg: LV, luogo: 'ankorondrano', skill: 'sociale', minSkill: 20 },
@@ -386,7 +386,7 @@ const DISP_VUOTA = () => ({ riso: 0, fagioli: 0, pasta: 0, patate: 0, carne: 0, 
 
 const MEST_RUOLO = { venditore: ['vendeur de riz au marché', 'vendeuse de fruits', 'vendeur de vêtements d\'occasion (friperie)'], vicino: ['voisin(e), tailleur', 'voisine, vend des mofo gasy', 'voisin, gardien de nuit', 'voisine, mère au foyer avec trois enfants'], amico: ['ami(e), apprenti mécanicien', 'ami(e), étudiant(e)', 'ami(e), vendeur ambulant', 'ami(e), chauffeur de taxi', 'ami(e), coiffeuse'] };
 function nuovoPNG(ruolo, opts = {}) {
-  const gen = opts.gen || pick(['M', 'F']); if (MEST_RUOLO[ruolo] && !(opts.extra && opts.extra.mest)) opts.extra = { mest: pick(MEST_RUOLO[ruolo]), ...(opts.extra || {}) };
+  const gen = opts.gen || pick(['M', 'F']); const notoDef = { nome: ruolo !== 'sconosciuto', eta: false, mest: ruolo !== 'sconosciuto', casa: false, storia: [], tratti: [] }; opts.extra = { noto: notoDef, ...(opts.extra || {}) }; if (MEST_RUOLO[ruolo] && !(opts.extra && opts.extra.mest)) opts.extra = { mest: pick(MEST_RUOLO[ruolo]), ...(opts.extra || {}) };
   return { id: 'p' + Math.random().toString(36).slice(2, 9), gen, nome: pick(gen === 'M' ? NOMI_M : NOMI_F), cognome: pick(COGNOMI), eta: opts.eta || rnd(18, 60), ruolo, tratti: [pick(TRATTI), pick(TRATTI)], quartiere: pick(QUARTIERI).nome, aff: opts.aff ?? rnd(5, 25), rom: 0, stato: 'conoscente', comp: rnd(1, 365), storia: [], ...opts.extra };
 }
 function nuovaPartita(nome, gen, eta) {
@@ -405,12 +405,8 @@ function nuovaPartita(nome, gen, eta) {
     png: [], partner: null, sposato: false, figli: [], gravidanza: null,
     log: [], fedina: 0, stat: { gg: 0, pasti: 0, lavate: 0 }, flags: {},
   };
-  S.png.push(nuovoPNG('amico', { aff: 40, eta: eta + rnd(-3, 3) }));
-  S.png.push(nuovoPNG('vicino', { aff: 15 }));
-  S.png.push(nuovoPNG('venditore', { aff: 10 }));
-  S.png.push(nuovoPNG('poliziotto', { aff: 0, gen: 'M' }));
-  S.png.push(nuovoPNG('medico', { aff: 5 }));
-  S.png.push(nuovoPNG('sconosciuto', { aff: 5, eta: eta + rnd(-2, 5) }));
+  S.folla = [];
+  { const a = nuovoPNG('sconosciuto', { aff: 20, eta: eta + rnd(-3, 3), extra: { quartiere: Q(S.q).nome } }); a.mest = pick(['apprenti mécanicien', 'vendeur ambulant', 'étudiant(e)']); generaVita(a, { casaQ: S.q }); a.qui = { q: S.q, poi: null, gg: 0, da: 6, a: 10 }; a.attivitaVisibile = 'assis(e) sur le muret, a l\'air du quartier'; S.folla.push(a); }
   log(`Bienvenue à Antananarivo, ${nome}. Tu es à Analakely avec ${Ar(S.soldi)} Ar en poche, sans logement, sans travail.`, 'info');
   log('Conseils : 📋 cherche un travail journalier au panneau d\'annonces d\'Analakely ; mange à l\'hotely (sans logement tu ne peux pas cuisiner) ; pour une chambre, va dans une agence immobilière (Analakely, Antanimena…).', 'info');
   salva();
@@ -441,39 +437,105 @@ function ha(id) { return S.mobili.includes(id); }
 function lavoro() { return LAVORI.find(l => l.id === S.lavoro); }
 function haCasa() { return S.casa !== 'strada'; }
 function png(id) { return S.png.find(p => p.id === id) || (S.folla || []).find(p => p.id === id); }
+function registra(p, incontro) { // entra nella lista "Persone" con solo ciò che si vede
+  if (S.png.includes(p)) return p; S.folla = folla().filter(x => x.id !== p.id); if (!p.vita) generaVita(p);
+  p.conosciuto = S.stat.gg; p.incontro = incontro || `rencontré(e) ${S.loc ? 'a ' + (POI[S.loc]?.nome || S.loc) + ' di ' : 'dans la rue à '}${Q(S.q).nome}`; p.attivitaVisibileIncontro = attivitaTxt(p) || null;
+  S.png.push(p); return p;
+}
 function folla() { return S.folla || (S.folla = []); }
 function chiaveLuogo(qid, poi) { return `${qid}:${poi || 'strada'}`; }
-function figuraNuova(qid, poi, mest, fissa) {
-  const q = Q(qid); const nome = poi ? (POI[poi]?.nome || poi) : q.nome;
-  const p = nuovoPNG('sconosciuto', { aff: fissa ? 15 : 12, extra: { mest, luogoQ: qid, luogoPoi: poi || null, luogoNome: nome, fissa: !!fissa, gg: S.stat.gg, quartiere: fissa && Math.random() < 0.5 ? q.nome : pick(QUARTIERI).nome } });
-  if (/mamma|signora|nonna|cassiera|cuoca|venditrice|studentessa|infermiera|impiegata/.test(mest)) { p.gen = 'F'; p.nome = pick(NOMI_F); }
-  if (/ragazzo|studente|giovane|muratore|tiratore|guardiano|tassista|operaio|allenatore|pastore|barista|cameriere|proprietario|venditore|capo|grossista/.test(mest) && p.gen === 'F' && !/proprietario\/a/.test(mest)) { p.gen = 'M'; p.nome = pick(NOMI_M); }
-  if (/nonna/.test(mest)) p.eta = rnd(60, 78); else if (/ragazzo|studente|giovane/.test(mest)) p.eta = rnd(16, 24); else if (/pastore|capo|grossista|proprietario|guida/.test(mest)) p.eta = rnd(35, 62);
+const IMPRESSIONI = { allegro: 'souriant(e)', sospettoso: 'à l\'air méfiant', chiacchierone: 'qui parle avec tout le monde', timido: 'à l\'air timide', severo: 'à l\'air sérieux', generoso: 'à l\'air affable', pettegolo: 'qui observe tout le monde', religioso: 'à l\'air posé', ambizioso: 'bien habillé(e)', pigro: 'à l\'air nonchalant', romantico: 'au regard rêveur', pratico: 'à l\'air expéditif', ironico: 'avec un demi-sourire', ansioso: 'à l\'air nerveux', orgoglioso: 'à l\'air snob', materno: 'à l\'air attentionné', furbo: 'au regard malin', gentile: 'à l\'air sympathique' };
+const IMPRESSIONI_TUTTE = ['à l\'air sympathique', 'à l\'air snob', 'à l\'air fatigué', 'à l\'air sérieux', 'souriant(e)', 'à l\'air méfiant', 'bien habillé(e)', 'à l\'air timide', 'à l\'air nerveux', 'à l\'air affable'];
+const STORIE = { origine: ['né(e) ici à Tana', 'arrivé(e) de Fianarantsoa adolescent(e)', 'a grandi à Antsirabe, à Tana depuis 10 ans', 'famille originaire de Toamasina', 'venu(e) de la campagne (Itasy) pour chercher du travail', 'a grandi à Ambohimanga'], famiglia: ['vit avec ses parents et trois frères', 'marié(e) avec deux jeunes enfants', 'veuf/veuve, une fille à l\'université', 'célibataire, envoie de l\'argent à sa mère en province', 'divorcé(e), un fils qui vit chez la grand-mère', 'marié(e), le conjoint travaille en zone franche', 'fiancé(e) depuis trois ans, attend d\'avoir l\'argent pour le vodiondry'], problema: ['a des dettes chez un usurier du quartier', 'son père est malade et les médicaments coûtent cher', 'le loyer a deux mois de retard', 'rêve d\'ouvrir une petite boutique mais n\'a pas le capital', 'a perdu son travail à l\'usine l\'an dernier', 'économise pour le permis', 'se dispute toujours avec son frère pour la maison familiale', 'voudrait émigrer à Mayotte ou en France', 'un fils doit payer l\'inscription au lycée'], passione: ['supporte les Barea et joue au foot le dimanche', 'chante dans la chorale de l\'église', 'suit les telenovelas brésiliennes', 'adore le hira gasy', 'joue au fanorona avec les anciens du quartier', 'cultive un potager derrière la maison', 'collectionne les téléphones cassés à réparer', 'va danser le samedi à Antaninarenina'] };
+const MEST_M = ['tailleur', 'vendeur ambulant', 'chauffeur de taxi', 'maçon', 'ouvrier de la zone franche', 'coiffeur', 'mécanicien', 'gardien', 'enseignant(e)', 'employé dans un bureau', 'menuisier', 'chauffeur de taxi-be', 'receveur de taxi-be', 'cuisinier dans un hotely', 'paysan qui vend au marché', 'étudiant', 'sans emploi, fait des petits boulots', 'retraité', 'petit commerçant'];
+const MEST_F = ['couturière', 'vendeuse ambulante', 'ouvrière de la zone franche', 'vendeuse en boutique', 'coiffeuse', 'enseignant(e)', 'infirmière', 'employée dans un bureau', 'lavandière', 'cuisinière dans un hotely', 'paysanne qui vend au marché', 'étudiante', 'sans emploi, fait des petits boulots', 'femme au foyer', 'retraitée', 'petite commerçante', 'vendeuse au marché'];
+function etaTxt(p) { const M = p.gen === 'M'; return p.eta < 18 ? (M ? 'garçon' : 'fille') : p.eta < 30 ? (M ? 'jeune homme' : 'jeune femme') : p.eta < 50 ? (M ? 'homme' : 'femme') : p.eta < 65 ? (M ? 'monsieur d\'âge mûr' : 'dame d\'âge mûr') : (M ? 'vieil homme' : 'vieille dame'); }
+function poiIn(qid, pref) { const l = Q(qid).poi; for (const x of pref) if (l.includes(x)) return x; return null; }
+function generaVita(p, opts = {}) {
+  // Vita regolare del personaggio: casa, lavoro con orari, spesa, chiesa, svago. Coerente con età, mestiere e carattere.
+  const casaQ = opts.casaQ || QUARTIERI.find(q => q.nome === p.quartiere)?.id || pick(QUARTIERI).id; p.quartiere = Q(casaQ).nome;
+  const mest = p.mest || pick(p.gen === 'M' ? MEST_M : MEST_F); p.mest = mest;
+  const student = /student/.test(mest) || (p.eta < 22 && Math.random() < 0.5 && !opts.lavoro);
+  const pens = /pensionat/.test(mest) || p.eta >= 65; const casal = /casalinga|disoccupat/.test(mest);
+  let lavoro = opts.lavoro || null;
+  if (!lavoro && !student && !pens && !casal) {
+    const luogoQ = Math.random() < 0.4 ? casaQ : pick(QUARTIERI).id; let poi = null;
+    if (/zona franca|operai/.test(mest)) poi = 'zonafranca'; else if (/mercato|ambulante|contadino/.test(mest)) poi = 'mercato'; else if (/hotely|cuoc/.test(mest)) poi = 'gargote'; else if (/commess/.test(mest)) poi = pick(['minimarket', 'super', 'epicerie']); else if (/insegnante/.test(mest)) poi = 'scuola'; else if (/infermier/.test(mest)) poi = 'ospedale'; else if (/impiegat/.test(mest)) poi = pick(['banca', 'comune', 'agenzia']); else if (/tassista|taxi-be|autista|ricevitore/.test(mest)) poi = null; else if (/muratore/.test(mest)) poi = null; else if (/guardiano/.test(mest)) poi = pick(['fabbrica', 'zonafranca', 'banca']);
+    const lq = poi && !Q(luogoQ).poi.includes(poi) ? (QUARTIERI.find(q => q.poi.includes(poi))?.id || luogoQ) : luogoQ;
+    const notte = /guardiano/.test(mest) && Math.random() < 0.6;
+    lavoro = { q: lq, poi, inizio: notte ? 18 : pick([6, 7, 7, 8, 8, 9]), fine: notte ? 6 : pick([16, 17, 17, 18, 19]), gg: /tassista|ambulante|mercato|hotely|guardiano|taxi-be|contadino/.test(mest) ? TUTTI : (Math.random() < 0.5 ? LS6 : LV) };
+  }
+  const scuola = student ? { q: p.eta >= 18 ? 'ambohipo' : casaQ, poi: p.eta >= 18 ? 'universita' : (poiIn(casaQ, ['scuola']) || 'scuola'), inizio: 7, fine: p.eta >= 18 ? 12 : 16, gg: LV } : null;
+  const relig = p.tratti.includes('religioso') || Math.random() < 0.55;
+  const spesaPoi = poiIn(casaQ, p.eta < 30 ? ['epicerie', 'mercato', 'minimarket'] : ['mercato', 'epicerie', 'super']) || 'epicerie';
+  const svagoPoi = p.tratti.includes('pigro') ? null : poiIn(casaQ, p.eta < 30 ? ['stadio', 'bar', 'lago', 'palestra'] : ['lago', 'bar', 'stadio']);
+  p.vita = { casaQ, lavoro, scuola, spesaOra: pick([6, 11, 12, 17, 18]), spesaPoi, chiesa: relig, svagoPoi, svagoGG: [pick([2, 3, 4]), 5, 6], sveglia: lavoro && lavoro.inizio <= 7 ? 5 : 6,
+    storia: { origine: pick(STORIE.origine), famiglia: p.eta < 22 ? pick(['vit avec ses parents et trois frères', 'vit chez sa grand-mère', 'vit chez sa tante en ville']) : pick(STORIE.famiglia), problema: pick(STORIE.problema), passione: pick(STORIE.passione) } };
+  p.impressione = Math.random() < 0.6 ? IMPRESSIONI[p.tratti[0]] : pick(IMPRESSIONI_TUTTE);
+  p.noto = p.noto || { nome: false, eta: false, mest: false, casa: false, storia: [], tratti: [] };
   return p;
 }
-function personeQui(qid, poi) {
-  // Figure fisse (sempre le stesse) + figure occasionali del giorno, per ogni luogo di ogni quartiere.
-  const k = chiaveLuogo(qid, poi); const F = folla();
-  let fissi = [...S.png, ...F].filter(p => p.luogoQ === qid && (p.luogoPoi || null) === (poi || null) && p.fissa);
-  if (!fissi.length && poi && FIGURE_FISSE[poi]) { fissi = FIGURE_FISSE[poi].map(m => figuraNuova(qid, poi, m, true)); F.push(...fissi); }
-  let occ = F.filter(p => p.luogoQ === qid && (p.luogoPoi || null) === (poi || null) && !p.fissa && p.gg === S.stat.gg);
-  if (!occ.length && !S.flags['gen' + k + S.stat.gg]) {
-    S.flags['gen' + k + S.stat.gg] = 1; const pool = poi ? (FIGURE_OCC[CAT_POI[poi]] || FIGURE_OCC.strada) : FIGURE_OCC.strada; const n = poi ? rnd(1, 2) : rnd(1, 3);
-    for (let i = 0; i < n; i++) { const o = figuraNuova(qid, poi, pick(pool), false); F.push(o); occ.push(o); }
-  }
-  const noti = S.png.filter(p => !p.fissa && p.luogoQ === qid && (p.luogoPoi || null) === (poi || null) && p.gg === S.stat.gg);
-  return [...fissi, ...noti, ...occ];
+function figuraNuova(qid, poi, mest, fissa) {
+  const q = Q(qid); const nome = poi ? (POI[poi]?.nome || poi) : q.nome;
+  const ruolo = fissa ? ({ ospedale: 'medico', comune: 'poliziotto', banca: 'bancario' }[poi] || 'sconosciuto') : 'sconosciuto';
+  const p = nuovoPNG(ruolo, { aff: fissa ? 12 : 8, extra: { mest, fissa: !!fissa, quartiere: (fissa && Math.random() < 0.5) || Math.random() < 0.35 ? q.nome : pick(QUARTIERI).nome } });
+  if (/mamma|signora|nonna|cassiera|cuoca|venditrice|studentessa|infermiera|impiegata|coppia|donna/.test(mest)) { p.gen = 'F'; p.nome = pick(NOMI_F); }
+  else if (/ragazzo|studente|giovane|muratore|tiratore|guardiano|tassista|operaio|allenatore|pastore|barista|cameriere|venditore|capo|grossista|agente/.test(mest) && !/proprietario\/a/.test(mest)) { p.gen = 'M'; p.nome = pick(NOMI_M); }
+  if (/nonna/.test(mest)) p.eta = rnd(60, 78); else if (/ragazzo|studente|giovane/.test(mest)) p.eta = rnd(16, 24); else if (/pastore|capo|grossista|proprietario|guida|medico/.test(mest)) p.eta = rnd(35, 62); else if (/mamma/.test(mest)) p.eta = rnd(24, 40);
+  if (fissa) generaVita(p, { lavoro: { q: qid, poi, inizio: poi === 'bar' ? 16 : poi === 'chiesa' ? 8 : 7, fine: poi === 'bar' ? 24 : poi === 'chiesa' ? 18 : 19, gg: ['banca', 'comune', 'agenzia', 'annunci', 'scuola', 'auto'].includes(poi) ? LV : ['minimarket', 'super', 'farmacia', 'palestra'].includes(poi) ? LS6 : TUTTI } });
+  else { const occ = mest; p.mest = /cliente|mamma|signora|persona|giovane che|coppia|passante|paziente|turista|ragazzo mandato|studentessa che|studente che|operaio in|tassista che|muratore che|ragazzo che gioca/.test(occ) ? null : occ; generaVita(p); p.mest = p.mest || p.mest; p.attivitaVisibile = occ; p.qui = { q: qid, poi: poi || null, gg: S.stat.gg, da: ora(), a: ora() + rnd(1, 2) }; }
+  return p;
 }
-function pulisciFolla() { S.folla = folla().filter(p => p.fissa || p.gg === S.stat.gg); for (const k in S.flags) if (k.startsWith('gen') && !k.endsWith(String(S.stat.gg))) delete S.flags[k]; }
+function attivitaTxt(p) { return p.attivitaVisibile && p.qui && p.qui.gg === S.stat.gg && ora() >= p.qui.da && ora() < p.qui.a ? p.attivitaVisibile : null; }
 function doveSta(p) {
-  // Dove si trova il personaggio adesso: al suo posto fisso, al lavoro con te, oppure a casa sua.
-  const h = ora();
-  if (p.luogoQ && (p.fissa ? h >= 6 && h < 21 : p.gg === S.stat.gg)) return { q: p.luogoQ, poi: p.luogoPoi, txt: p.luogoNome + (p.luogoPoi ? ' a ' + Q(p.luogoQ).nome : '') };
-  if (['capo', 'collega'].includes(p.ruolo) && S.lavoro !== 'nulla' && statoTurno(lavoro()).stato !== 'chiuso' && h >= 7 && h < 19) return { q: lavoro().luogo, poi: 'lavoro', txt: 'au travail' };
-  const qid = QUARTIERI.find(q => q.nome === p.quartiere)?.id || S.q; return { q: qid, poi: 'casa', txt: 'chez lui/elle à ' + p.quartiere };
+  // Agenda giornaliera: dove si trova il personaggio adesso in base alla sua vita (lavoro, scuola, spesa, chiesa, svago, casa, sonno).
+  if (!p.vita) generaVita(p);
+  const h = ora(), g = giornoIdx(), V = p.vita; const casaTxt = 'chez lui/elle à ' + Q(V.casaQ).nome;
+  if (p.qui && p.qui.gg === S.stat.gg && h >= p.qui.da && h < p.qui.a) return { q: p.qui.q, poi: p.qui.poi, txt: (p.qui.poi ? POI[p.qui.poi]?.nome + ' a ' : 'dans la rue à ') + Q(p.qui.q).nome, att: p.attivitaVisibile };
+  if (['capo', 'collega'].includes(p.ruolo) && S.lavoro !== 'nulla') { const l = lavoro(); if (l.gg.includes(g) && h >= l.inizio - 1 && h < l.fine + 1) return { q: l.luogo, poi: 'lavoro', txt: 'au travail', att: 'au travail' }; }
+  const L = V.lavoro; if (L && L.gg.includes(g)) { const inL = L.inizio < L.fine ? (h >= L.inizio && h < L.fine) : (h >= L.inizio || h < L.fine); if (inL) return { q: L.q, poi: L.poi, txt: (L.poi ? POI[L.poi]?.nome + ' a ' : 'au travail dans la rue à ') + Q(L.q).nome, att: 'au travail' }; }
+  const Sc = V.scuola; if (Sc && Sc.gg.includes(g) && h >= Sc.inizio && h < Sc.fine) return { q: Sc.q, poi: Sc.poi, txt: (POI[Sc.poi]?.nome) + ' a ' + Q(Sc.q).nome, att: 'en cours' };
+  if (V.chiesa && g === 6 && h >= 8 && h < 11) { const cq = Q(V.casaQ).poi.includes('chiesa') ? V.casaQ : 'analakely'; return { q: cq, poi: 'chiesa', txt: 'à l\'église à ' + Q(cq).nome, att: 'à la messe' }; }
+  if (h === V.spesaOra) return { q: V.casaQ, poi: V.spesaPoi, txt: POI[V.spesaPoi]?.nome + ' a ' + Q(V.casaQ).nome, att: 'fait ses courses' };
+  if (V.svagoPoi && V.svagoGG.includes(g) && h >= 18 && h < 21) return { q: V.casaQ, poi: V.svagoPoi, txt: POI[V.svagoPoi]?.nome + ' a ' + Q(V.casaQ).nome, att: 'se détend' };
+  if (h >= 22 || h < V.sveglia) return { q: V.casaQ, poi: 'casa', txt: casaTxt, att: 'dort', dorme: true };
+  if ((h === 17 || h === 12) && Math.random() < 0.0) return null;
+  return { q: V.casaQ, poi: 'casa', txt: casaTxt, att: 'à la maison' };
 }
-function presente(p) { const d = doveSta(p); if (d.q !== S.q) return false; if (d.poi === 'casa') return !!p.visita; if (d.poi === 'lavoro') return S.loc === 'lavoro'; if (d.poi) return S.loc === d.poi; return !S.loc; }
+function presente(p) { const d = doveSta(p); if (!d || d.q !== S.q) return false; if (d.poi === 'casa') return !!p.visita; if (d.poi === 'lavoro') return S.loc === 'lavoro'; if (d.poi) return S.loc === d.poi; return !S.loc; }
+function personeQui(qid, poi) {
+  // Tutti quelli che, secondo la loro agenda, sono in questo luogo adesso + qualche figura occasionale nuova.
+  const F = folla(); const key = 'gen' + chiaveLuogo(qid, poi) + S.stat.gg + 'h' + Math.floor(ora() / 3);
+  if (poi && FIGURE_FISSE[poi] && !F.concat(S.png).some(p => p.fissa && p.vita?.lavoro?.q === qid && p.vita?.lavoro?.poi === poi)) F.push(...FIGURE_FISSE[poi].map(m => figuraNuova(qid, poi, m, true)));
+  if (!S.flags[key] && ora() >= 6 && ora() < 22) { S.flags[key] = 1; const pool = poi ? (FIGURE_OCC[CAT_POI[poi]] || FIGURE_OCC.strada) : FIGURE_OCC.strada; const n = poi ? rnd(1, 2) : rnd(1, 3); for (let i = 0; i < n; i++) F.push(figuraNuova(qid, poi, pick(pool), false)); }
+  const qui = [...S.png, ...F].filter(p => { const d = doveSta(p); return d && d.q === qid && (d.poi || null) === (poi || null) && d.poi !== 'casa' && !d.dorme; });
+  return qui.filter((p, i) => qui.indexOf(p) === i).slice(0, 8);
+}
+function pulisciFolla() { S.folla = folla().filter(p => p.fissa || (p.qui && p.qui.gg >= S.stat.gg - 1)); for (const k in S.flags) if (k.startsWith('gen') && !k.includes(String(S.stat.gg))) delete S.flags[k]; }
 function puoTelefonare(p) { return !!p.numero && ha('telefono'); }
+function conosci(p, campi = []) { if (!p.noto) p.noto = { nome: false, eta: false, mest: false, casa: false, storia: [], tratti: [] }; campi.forEach(c => { if (c === 'nome' || c === 'eta' || c === 'mest' || c === 'casa') p.noto[c] = true; }); }
+function nomeNoto(p) { return p.noto && !p.noto.nome ? (etaTxt(p).replace(/^./, c => c.toUpperCase()) + (p.impressione ? ' ' + p.impressione : '')) : `${p.nome} ${p.cognome}`; }
+function descrNota(p) {
+  if (!p.noto) return `${p.mest || ruoloTxt(p)} · ${p.quartiere} · ${trattiTxt(p)}`;
+  const parts = [];
+  if (p.ruolo !== 'sconosciuto' && !p.mest) parts.push(ruoloTxt(p)); else if (p.noto.mest && p.mest) parts.push(p.mest); else if (p.fissa && p.mest) parts.push(p.mest); else if (p.attivitaVisibileIncontro) parts.push(p.attivitaVisibileIncontro);
+  if (p.noto.eta) parts.push(p.eta + ' ans');
+  if (p.noto.casa) parts.push('habite à ' + p.quartiere);
+  if (p.noto.tratti.length) parts.push(p.noto.tratti.map(t => TRATTI_LBL[t] || t).join(', '));
+  if (p.incontro) parts.push(p.incontro);
+  return parts.join(' · ');
+}
+function schedaNota(p) {
+  if (!p.noto) return '';
+  const st = p.vita?.storia || {}; const righe = [];
+  righe.push(`<b>Nome:</b> ${p.noto.nome ? p.nome + ' ' + p.cognome : '?'}`); righe.push(`<b>Età:</b> ${p.noto.eta ? p.eta + ' ans' : 'environ ' + etaTxt(p)}`);
+  righe.push(`<b>Mestiere:</b> ${p.noto.mest || p.fissa ? (p.mest || ruoloTxt(p)) : '?'}`); righe.push(`<b>Abita:</b> ${p.noto.casa ? p.quartiere : '?'}`);
+  righe.push(`<b>Carattere:</b> ${p.noto.tratti.length ? p.noto.tratti.map(t => TRATTI_LBL[t] || t).join(', ') : 'au feeling : ' + (p.impressione || '?')}`);
+  const sto = p.noto.storia.map(k => st[k]).filter(Boolean); righe.push(`<b>Vita:</b> ${sto.length ? sto.join('; ') : '?'}`);
+  if (p.incontro) righe.push(`<b>Incontro:</b> ${p.incontro}`);
+  if (p.numero) righe.push('📱 tu as son numéro');
+  return `<details style="margin-top:6px"><summary class="mut">Cosa sai di questa persona</summary><p class="mut" style="line-height:1.7">${righe.join('<br>')}</p></details>`;
+}
 function prezzoPronto(c, q = S.q) { return c.tier[Q(q).tier - 1]; }
 function prezzo(base, negozio, q = S.q) { const p = base * (MULT_NEGOZIO[negozio] || 1) * MULT_CIBO[Q(q).tier]; return Math.max(100, Math.round(p / 100) * 100); }
 function casaComfortSonno() { if (S.flags.ostello) return 4; if (S.flags.daOspite) return 5; let c = casa().comfort; if (ha('letto')) c += 3; else if (ha('materasso')) c += 1; return c; }
@@ -714,7 +776,7 @@ const A = {
   chiesa() { avanza(120); S.bis.umore = clamp(S.bis.umore + 10); skillUp('sociale', 0.5); if (Math.random() < 0.4) { const p = nuovoPNG('amico', { aff: 25, extra: { tratti: ['religioso', pick(TRATTI)] } }); S.png.push(p); log(`Après la messe tu as parlé avec ${p.nome}.`, 'info'); } else log('Messe à la FJKM : chants et paix intérieure.'); },
   rova() { if (!paga(10000)) return toast('Il faut 10 000 Ar.'); avanza(120); S.bis.umore = clamp(S.bis.umore + 15); skillUp('intelligenza', 0.8); log('Tu as visité le Rova de Manjakamiadana : l\'histoire des rois merina et tout Tana à tes pieds.'); },
   lago() { avanza(60); S.bis.umore = clamp(S.bis.umore + 8); S.bis.energia = clamp(S.bis.energia + 3); log('Promenade autour du lac Anosy sous les jacarandas.'); },
-  visita(id) { const p = png(id); const d = doveSta(p); if (d.q !== S.q) return toast(`${p.nome} habite à ${p.quartiere} : vas-y.`); avanza(15); if (p.aff < 30 && Math.random() < 0.6) { p.aff = clamp(p.aff - 1); return log(`Tu as frappé chez ${p.nome} : « Azafady, là je ne peux pas. » Il/elle ne te connaît pas assez.`, 'bad'); } p.visita = true; p.aff = clamp(p.aff + 2); ricorda(p, 'est venu(e) me voir à la maison'); log(`Tu es chez ${p.nome} a ${p.quartiere} : il/elle t'offre un thé.`, 'good'); apriChat(id); },
+  visita(id) { const p = png(id); if (!p.noto?.casa) return toast('Tu ne sais pas où il/elle habite.'); const d = doveSta(p); if (d.q !== S.q) return toast(`${p.nome} habite à ${p.quartiere} : vas-y.`); avanza(15); if (p.aff < 30 && Math.random() < 0.6) { p.aff = clamp(p.aff - 1); return log(`Tu as frappé chez ${p.nome} : « Azafady, là je ne peux pas. » Il/elle ne te connaît pas assez.`, 'bad'); } p.visita = true; p.aff = clamp(p.aff + 2); ricorda(p, 'est venu(e) me voir à la maison'); log(`Tu es chez ${p.nome} a ${p.quartiere} : il/elle t'offre un thé.`, 'good'); apriChat(id); },
   chiediNumero(id) { const p = png(id); const box = $('chatBox'); const t = 'Dis, tu me donnes ton numéro ? Comme ça on reste en contact.'; if (box) { box.innerHTML += `<div class="msg me">${esc(t)}</div><div class="msg them mut" id="typing">…</div>`; box.scrollTop = 1e9; } parla(p, t).then(r => { const ty = $('typing'); if (ty) { ty.textContent = r; ty.classList.remove('mut'); ty.id = ''; } render(); salva(); }); },
   regalo(id, tipo) { const p = png(id); const c = { fiori: 5000, gioiello: 200000 }[tipo]; if (!paga(c)) return toast('Argent insuffisant.'); const b = { fiori: 5, gioiello: 20 }[tipo]; p.aff = clamp(p.aff + b); if (p.rom > 0) p.rom = clamp(p.rom + b); avanza(30); log(`Cadeau (${tipo}) a ${p.nome} : affinité +${b}.`, 'good'); },
   uscita(id) { const p = png(id); if (!paga(15000)) return toast('Une sortie coûte ~15.000 Ar.'); avanza(180); p.aff = clamp(p.aff + 8); skillUp('sociale', 1); S.bis.umore = clamp(S.bis.umore + 10); if (p.eta >= 18) p.rom = clamp(p.rom + 6); log(`Sortie avec ${p.nome} : hotely et promenade.`, 'good'); },
@@ -845,11 +907,14 @@ function sistemaPrompt(p) {
   if (p.ruolo === 'vicino') poteri.push('DENUNCIA — tu appelles la police si le joueur te menace ou est ivre et pénible (amende 20 000 Ar).');
   if (p.eta >= 18 && !['capo', 'poliziotto', 'medico', 'professore', 'bancario'].includes(p.ruolo) && !S.sposato) poteri.push('FLIRT — tu montres un intérêt romantique (attirance +8) si le moment est bon et affinité ≥ 40 ; si le joueur est marié/en couple avec quelqu’un d’autre, évite ou demande des explications.');
   if (p.id === S.partner) poteri.push('LASCIA — tu le/la quittes s’il/elle te trompe, t’insulte ou te néglige depuis des semaines.');
+  const st = p.vita?.storia || {}; const sa = p.noto ? [p.noto.nome ? 'ton nom' : '', p.noto.eta ? 'ton âge' : '', p.noto.mest ? 'ton métier' : '', p.noto.casa ? 'où tu habites' : '', ...p.noto.storia.map(k => 'que ' + st[k])].filter(Boolean) : ['tout'];
+  const vitaTxt = `TA VIE (secrète tant que tu ne la racontes pas) : ${st.origine || ''} ; ${st.famiglia || ''} ; ${st.problema || ''} ; ${st.passione || ''}. Tu habites à ${p.quartiere}${p.vita?.lavoro ? `, tu travailles comme ${p.mest} (${hh(p.vita.lavoro.inizio)}–${hh(p.vita.lavoro.fine)}${p.vita.lavoro.poi ? ' à ' + (POI[p.vita.lavoro.poi]?.nome || '') : ''} à ${Q(p.vita.lavoro.q).nome})` : p.vita?.scuola ? ', tu étudies' : ''}. En ce moment : ${doveSta(p)?.att || ''}${attivitaTxt(p) ? ' (' + attivitaTxt(p) + ')' : ''}. LE JOUEUR SAIT DE TOI SEULEMENT : ${sa.length ? sa.join(', ') : 'rien (il te voit seulement)'}. Ne te présente pas d’un coup avec ton nom et ta biographie : révèle les choses petit à petit, seulement s’il te le demande ou si ça vient naturellement, comme une vraie personne (un méfiant dit peu, un bavard beaucoup).`;
+  poteri.push('Quand tu RÉVÈLES quelque chose sur toi, ajoute le tag correspondant : [NOME] si tu dis ton nom, [ETA] ton âge, [MESTIERE] ton travail, [CASA] où tu habites, [ORIGINE] d’où tu viens, [FAMIGLIA] ta famille, [PROBLEMA] tes ennuis, [PASSIONE] tes passions. [TRATTO] quand ton caractère ressort clairement.');
   if (!p.numero) poteri.push('NUMERO — tu donnes ton numéro de téléphone au joueur (seulement s\'il t\'est sympathique : affinité ≥ 30, ou ≥ 20 si tu es bavard/généreux ; jamais si tu es méfiant et affinité < 45).');
   poteri.push('AFF:n — obligatoire, n entre -3 et +3 : à quel point l’échange t’a plu.');
   const guida = RUOLO_GUIDA[p.ruolo] || RUOLO_GUIDA.sconosciuto; const car = p.tratti.map(t => `${TRATTI_LBL[t] || t} (${TRATTI_DESC[t] || ''})`).join('; ');
   const canale = ui.canale === 'tel' ? 'Vous parlez AU TÉLÉPHONE (appel ou message) : tu ne vois pas le joueur, vous ne pouvez rien vous donner de main à main ; tu entends seulement la voix/le ton. N\'utilise pas OSPITA/REGALA_CIBO sauf pour fixer un rendez-vous.' : `Vous êtes EN PERSONNE, ${p.visita ? 'chez toi' : presente(p) ? 'ici à ' + (S.loc ? (POI[S.loc]?.nome || S.loc) + ', ' : '') + Q(S.q).nome : 'au même endroit'}.`;
-  return `Tu es ${p.nome} ${p.cognome}, ${p.eta} ans, ${p.gen === 'M' ? 'homme' : 'femme'}, tu vis à ${p.quartiere}, Antananarivo (Madagascar). Rôle envers le joueur : ${ruoloTxt(p)}${p.stato !== 'conoscente' ? ' et ' + STATO_LBL[p.stato] : ''}. ${dominio(p)} JOUE PLEINEMENT TON RÔLE : ${guida}. Ton CARACTÈRE colore tout ce que tu dis : ${car}. ${canale}${p.numero ? ' Le joueur a ton numéro.' : ''} Affinité avec le joueur : ${p.aff}/100${p.rom ? ', attirance ' + p.rom + '/100' : ''}. Services que tu lui as déjà rendus : ${(p.favori || 0)} ; services qu'il/elle t'a rendus : ${(p.favoriRicevuti || 0)}${p.debito ? `; il/elle te doit encore ${Ar(p.debito)} Ar` : ''}.
+  return `Tu es ${p.nome} ${p.cognome}, ${p.eta} ans, ${p.gen === 'M' ? 'homme' : 'femme'}, tu vis à ${p.quartiere}, Antananarivo (Madagascar). Rôle envers le joueur : ${ruoloTxt(p)}${p.stato !== 'conoscente' ? ' et ' + STATO_LBL[p.stato] : ''}. ${dominio(p)} ${vitaTxt} JOUE PLEINEMENT TON RÔLE : ${guida}. Ton CARACTÈRE colore tout ce que tu dis : ${car}. ${canale}${p.numero ? ' Le joueur a ton numéro.' : ''} Affinité avec le joueur : ${p.aff}/100${p.rom ? ', attirance ' + p.rom + '/100' : ''}. Services que tu lui as déjà rendus : ${(p.favori || 0)} ; services qu'il/elle t'a rendus : ${(p.favoriRicevuti || 0)}${p.debito ? `; il/elle te doit encore ${Ar(p.debito)} Ar` : ''}.
 CE DONT TU TE SOUVIENS de lui/elle : ${memoriaTxt(p)}.${p.pendOspita ? ' Ce matin tu lui as fait savoir que tu pourrais l\'héberger : s\'il/elle te le demande poliment, utilise [OSPITA:n].' : ''}
 CE QUI SE DIT (rumeurs venues d'autres personnes) : ${vociTxt(p)}.
 Autres personnes importantes dans la vie du joueur : ${relazioniTxt(p)}.
@@ -931,6 +996,9 @@ function applicaAzioniPNG(p, out) {
   const hasCasaPNG = true; const n = v => Math.max(0, parseInt(String(v).replace(/[^\d-]/g, '')) || 0);
   for (const [k, v] of tags) {
     if (k === 'AFF') { aff = Math.max(-3, Math.min(3, parseInt(v) || 0)); continue; }
+    if (['NOME', 'ETA', 'MESTIERE', 'CASA'].includes(k)) { conosci(p, [{ NOME: 'nome', ETA: 'eta', MESTIERE: 'mest', CASA: 'casa' }[k]]); continue; }
+    if (['ORIGINE', 'FAMIGLIA', 'PROBLEMA', 'PASSIONE'].includes(k)) { const c = k.toLowerCase(); if (p.noto && !p.noto.storia.includes(c)) p.noto.storia.push(c); continue; }
+    if (k === 'TRATTO') { if (p.noto) { const t = p.tratti.find(x => !p.noto.tratti.includes(x)); if (t) p.noto.tratti.push(t); } continue; }
     if (k === 'NUMERO') { if (!p.numero && p.aff >= 10) { p.numero = true; ricorda(p, 'je lui ai donné mon numéro'); eff.push(`📱 ${p.nome} t'a donné son numéro : tu peux maintenant appeler ou écrire (il faut un smartphone).`); } continue; }
     if (k === 'OSPITA' && p.aff >= 40 && hasCasaPNG) { const gg = Math.min(14, Math.max(1, n(v) || 3)); S.ospite = { id: p.id, nome: p.nome, gg, q: QUARTIERI.find(q => q.nome === p.quartiere)?.id || S.q }; p.favori = (p.favori || 0) + 1; ricorda(p, `je l'ai hébergé(e) pendant ${gg} nuits`); eff.push(`🛏️ ${p.nome} t'héberge pendant ${gg} nuits à ${p.quartiere} : vas-y et utilise « Dormir chez ${p.nome}».`); }
     else if (k === 'PRESTA' && p.aff >= 45) { const a = Math.min(20000, Math.max(1000, n(v))); if (a && !p.debito) { S.soldi += a; p.debito = a; p.favori = (p.favori || 0) + 1; ricorda(p, `je lui ai prêté ${Ar(a)} Ar`); eff.push(`💵 ${p.nome} te prête ${Ar(a)} Ar (rends-les !).`); } }
@@ -952,11 +1020,12 @@ function applicaAzioniPNG(p, out) {
   return { out, aff, eff };
 }
 async function parla(p, testo) {
-  if (!S.png.includes(p)) { S.folla = folla().filter(x => x.id !== p.id); p.conosciuto = S.stat.gg; S.png.push(p); log(`Tu as fait la connaissance de ${p.nome} ${p.cognome}, ${p.mest || ruoloTxt(p)}${p.luogoNome ? ' (' + p.luogoNome + ')' : ''}.`, 'info'); }
+  if (!S.png.includes(p)) { registra(p); log(`Tu as parlé avec ${nomeNoto(p)} (${attivitaTxt(p) || p.mest || ruoloTxt(p)}). Il/elle est maintenant dans ta liste Personnes.`, 'info'); }
   p.storia.push({ role: 'user', content: testo });
   let out = null, err = null;
   try { const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system: sistemaPrompt(p), messages: p.storia.slice(-12) }) }); const j = await r.json(); if (j.text) out = j.text; ui.aiActive = j.ai; err = j.error; } catch (e) {}
   let aff = 0, eff = [];
+  if (out && p.noto) { const low = out.toLowerCase(); if (low.includes(p.nome.toLowerCase())) conosci(p, ['nome']); if (new RegExp('\\b' + p.eta + '\\s*(anni|ans)').test(low)) conosci(p, ['eta']); if (low.includes(p.quartiere.toLowerCase()) && /abit|vivo|casa|habite|vis à/.test(low)) conosci(p, ['casa']); if (p.mest && low.includes(p.mest.split(/[ /]/)[0].toLowerCase()) && p.mest.length > 4) conosci(p, ['mest']); if (p.storia.length >= 6 && !p.noto.tratti.length) p.noto.tratti.push(p.tratti[0]); if (p.storia.length >= 14 && p.noto.tratti.length < 2) p.noto.tratti.push(p.tratti[1]); }
   if (out) { const r = applicaAzioniPNG(p, out); out = r.out || '…'; aff = r.aff; eff = r.eff; }
   else { const f = fallbackRisposta(p, testo); out = f.text; aff = f.aff; }
   p.aff = clamp(p.aff + aff); if (p.rom > 0 || /amore|bell/.test(testo)) p.rom = clamp((p.rom || 0) + Math.max(0, aff));
@@ -1077,21 +1146,21 @@ function vQuartiere(q) {
     if (!L.length) h += '<p class="mut">Aujourd\'hui personne ne cherche d\'aide.</p>';
     L.forEach((j, i) => { const l = LAVORETTI.find(x => x.id === j.id); const req = [l.fit ? 'forme ' + l.fit : '', l.soc ? 'social ' + l.soc : '', l.casa ? 'maison ' + l.casa : '', l.edu ? EDU[l.edu] : ''].filter(Boolean).join(', '); const scaduto = ora() > j.inizio + 2; const cf = conflittoLavoretto(j); const cfTag = cf ? (cf.tipo === 'sovrapposto' ? ' <span class="tag" style="background:#5a2a2a">⛔ ' + cf.txt + '</span>' : ' <span class="tag" style="background:#234d3a">✅ ' + cf.txt + '</span>') : ''; h += act(`${l.icon} ${l.nome}${cfTag}${l.bucato ? ' <span class="mut">' + (j.bucato.cortile ? '· cour disponible' : '· à emporter au bassin public') + '</span>' : ''}`, () => l.bucato ? A.lavoretto(i) : conferma(`${l.icon} ${l.nome}?`, `${l.desc}<br><br>⏰ Ça commence à <b>${hh(j.inizio)}</b> (arrive dans les 2h), dure <b>${j.ore}h</b> → fin ~${hh((j.inizio + j.ore) % 24)}<br>💰 <b>${Ar(j.paga)} Ar</b> en espèces à la fin${l.veicolo && S.veicolo ? ' (×' + (S.veicolo === 'bici' ? '1.3' : l.veicolo) + ' avec ton véhicule)' : ''}<br>⚡ fatigue ${Math.round(l.fatica * j.ore * 0.5 + 5 * j.ore)} · 🧼 hygiène -${Math.round(l.igiene * j.ore * 0.5 + 2 * j.ore)}${req ? '<br>Prérequis : ' + req : ''}${S.lavoro !== 'nulla' ? '<br><span class="mut">Ton service fixe : ' + orarioLavoro(lavoro()) + ' — vérifie de ne pas te chevaucher.</span>' : ''}`, () => A.lavoretto(i), 'J\'accepte'), `${j.fatto ? '✅ fait' : scaduto ? '⌛ expiré' : hh(j.inizio) + '–' + hh((j.inizio + j.ore) % 24) + ' · ' + j.ore + 'h · ' + Ar(j.paga) + ' Ar'}${req ? ' · ' + req : ''}`, j.fatto || scaduto || (cf && cf.tipo === 'sovrapposto')); });
     h += '</div>'; }
-  { const qui = personeQui(q.id, null); const abitanti = S.png.filter(p => !p.luogoQ && doveSta(p).q === q.id && doveSta(p).poi === 'casa'); h += cardPersoneQui(qui, 'Dans la rue'); if (abitanti.length) h += `<div class="card"><h3>🏠 Abitano qui</h3>${abitanti.map(p => act(`🚪 Aller chez ${p.nome} ${p.cognome}`, () => A.visita(p.id), `${ruoloTxt(p)} · affinità ${p.aff}` + (p.aff < 30 ? ' · pourrait ne pas t\'ouvrir' : ''))).join('')}</div>`; }
+  { const qui = personeQui(q.id, null); const abitanti = S.png.filter(p => p.noto?.casa && doveSta(p)?.q === q.id && doveSta(p)?.poi === 'casa'); h += cardPersoneQui(qui, 'Personnes autour'); if (abitanti.length) h += `<div class="card"><h3>🏠 Abitano qui</h3>${abitanti.map(p => act(`🚪 Aller chez ${p.nome} ${p.cognome}`, () => A.visita(p.id), `${ruoloTxt(p)} · affinità ${p.aff}` + (p.aff < 30 ? ' · pourrait ne pas t\'ouvrir' : ''))).join('')}</div>`; }
   h += `<div class="card"><h3>Dans la rue</h3>${act('⏳ Attendre…', () => { ui.modal = { tipo: 'aspetta' }; }, 'choisis une durée ou une heure')}${S.ospite && S.ospite.gg > 0 && S.q === S.ospite.q ? act(`🛏️ Dormir chez ${S.ospite.nome}…`, () => { ui.modal = { tipo: 'dormi', ospite: true }; }, `hébergé(e) encore ${S.ospite.gg} nuits · gratuit`) + act(`🧹 Donner un coup de main chez ${S.ospite.nome}`, A.aiutaOspite, '2h · affinité +5') : ''}${!haCasa() ? act('😴 Dormir dans la rue…', () => { ui.modal = { tipo: 'dormi' }; }, 'choisis durée ou réveil · moral -10 · hygiène -10 · risque de vol') + act('🛏️ Dormir à l\'auberge…', () => { ui.modal = { tipo: 'dormi', ostello: true }; }, 'choisis durée ou réveil · 15.000 Ar/nuit · douche incluse') : ''}${act('🤲 Faire la manche…', () => { ui.modal = { tipo: 'elemosina' }; }, ({ 1: '~1 sur 7 donne 200–1.000 Ar', 2: '~1 sur 10 donne 500–2.000 Ar', 3: '~1 sur 16 donne 1–5.000 Ar', 4: '~1 sur 28 donne 2–10.000 Ar · risque gardiens', 5: '~1 sur 45 donne 5–20.000 Ar · risque gardiens' })[q.tier] + ' · moral -4/h')}${S.fedina < 3 && q.tier <= 2 ? act('🕵️ Voler un passant', () => conferma('🕵️ Prendre le risque ?', '50% : tu voles 5–40.000 Ar. 50% : arrêté(e), 3 nuits en cellule, amende 100.000 Ar et casier judiciaire.', A.borseggia, 'Je risque'), '1h · risqué') : ''}</div>`;
   h += `<div class="card"><h3>Derniers événements</h3><div class="log">${S.log.slice(0, 5).map(e => `<div class="${e.tipo}"><span class="mut">${e.d}</span> · ${esc(e.t)}</div>`).join('')}</div></div>`;
   return h;
 }
 function cardPersoneQui(list, titolo) {
   if (!list.length) return '';
-  return `<div class="card"><h3>👥 ${titolo}</h3><p class="mut">Tocca qualcuno per parlargli. Gli sconosciuti diventano conoscenze dopo la prima chiacchierata.</p>${list.map(p => `<div class="person" onclick="apriChat('${p.id}')">${avatarHtml(p)}<div class="n"><b>${S.png.includes(p) ? p.nome + ' ' + p.cognome : (p.gen === 'M' ? 'Un inconnu' : 'Une inconnue')}</b> <span class="mut">${p.eta}</span><div class="mut">${p.mest || ruoloTxt(p)}${S.png.includes(p) ? ' · ' + trattiTxt(p) : ''}</div></div>${S.png.includes(p) ? `<span class="mut">${p.aff}</span>` : '<span class="mut">💬</span>'}</div>`).join('')}</div>`;
+  return `<div class="card"><h3>👀 ${titolo}</h3><p class="mut">Vedi solo l'aspetto. Tocca qualcuno per parlargli: chiedere un'informazione basta perché resti nella tua lista Persone.</p>${list.map(p => `<div class="person" onclick="apriChat('${p.id}')">${avatarHtml(p)}<div class="n"><b>${nomeNoto(p)}</b><div class="mut">${attivitaTxt(p) || (p.fissa ? p.mest : doveSta(p)?.att || '')}${S.png.includes(p) ? ' · <span style="color:var(--good)">connu(e)</span>' : ''}</div></div><span class="mut">${S.png.includes(p) ? p.aff : '💬'}</span></div>`).join('')}</div>`;
 }
 function vLuogo(q) {
   const p = S.loc; const d = p === 'attivita' ? { nome: ATTIVITA.find(a => a.id === S.attivita.id).nome, icon: ATTIVITA.find(a => a.id === S.attivita.id).icon } : POI[p];
   let h = `<button class="sec" onclick="S.loc=null;render()">‹ ${q.nome}</button><div class="qhero phero"><img src="${ART_BASE}${p === 'casa' ? 'h/' + artCasa(casa()) : 'p/' + p}.webp" alt="" onerror="this.parentNode.classList.add('noimg')"><div class="qh"><h2>${d.icon} ${d.nome}</h2></div></div>`;
   const F = { casa: vCasa, lavoro: vLavoro, annunci: vAnnunci, mercato: () => vNegozio('mercato'), epicerie: () => vNegozio('epicerie'), minimarket: () => vNegozio('minimarket'), super: () => vNegozio('super'), bagni: vBagni, gargote: () => vPronto('gargote'), ristorante: () => vPronto('ristorante'), banca: vBanca, agenzia: vAgenzia, ospedale: vOspedale, farmacia: vFarmacia, auto: vAuto, scuola: () => vScuola('scuola'), universita: () => vScuola('universita'), stadio: vSport, palestra: vSport, chiesa: () => act('⛪ Assister à la messe', A.chiesa, '2h · moral +10 · rencontres'), comune: vComune, bar: vBar, lago: () => act('🌳 Se promener', A.lago, '1h · moral +8') + act('🏃 Courir autour du lac', () => A.sport('corsa'), '1h30 · gratuit · forme +'), zonafranca: () => `<p class="mut">Les usines textiles de la zone franche. Pour y travailler, postule au panneau 📋 d'Analakely.</p>`, aeroporto: () => `<p class="mut">Arrivées et départs, touristes, taxis officiels. Les offres d'emploi du coin sont sur le tableau 📋 d'Analakely.</p>` + act('👀 Regarder les avions', A.lago, '1h · moral +8'), fornace: () => `<p class="mut">Des tas de briques rouges fument dans les rizières. Travail à la journée : regarde les petits boulots du jour ou le tableau 📋.</p>`, grossista: () => `<p class="mut">Camions et sacs de 50 kg. Ici le riz coûte moins cher que partout ailleurs : achète au marché d'Anosibe.</p>`, fabbrica: () => `<p class="mut">Équipes dès 6 h, badge, cantine. Les offres sont sur le tableau 📋 d'Analakely.</p>`, rova: () => act('🏰 Visiter le Rova', A.rova, '2h · 10 000 Ar · moral +15 · intelligence +') + act('🌄 Regarder le coucher de soleil sur la ville', A.lago, '1h · moral +8'), attivita: vAttivita };
   h += `<div class="card">${F[p]()}</div>`;
-  if (!['casa', 'lavoro', 'attivita'].includes(p)) h += cardPersoneQui(personeQui(S.q, p), 'Personnes ici'); else if (p === 'lavoro') h += cardPersoneQui(S.png.filter(x => presente(x)), 'Collègues présents'); else if (p === 'attivita') h += cardPersoneQui(S.png.filter(x => x.ruolo === 'dipendente'), 'Dans la boutique');
+  if (!['casa', 'lavoro', 'attivita'].includes(p)) h += cardPersoneQui(personeQui(S.q, p), 'Personnes autour'); else if (p === 'lavoro') h += cardPersoneQui(S.png.filter(x => presente(x)), 'Collègues présents'); else if (p === 'attivita') h += cardPersoneQui(S.png.filter(x => x.ruolo === 'dipendente'), 'Dans la boutique');
   h += `<div class="card">${['lavoro', 'gargote', 'casa'].includes(p) ? act('🚽 Aller aux toilettes', A.bagno, '5 min · gratuit') : ''}${act('⏳ Attendre…', () => { ui.modal = { tipo: 'aspetta' }; }, p === 'lavoro' && statoTurno(lavoro()).stato === 'presto' ? 'ex. jusqu\'au début du service' : 'choisis durée ou heure')}</div>`;
   return h;
 }
@@ -1167,8 +1236,10 @@ function vPersone() {
   let h = '<h2>👥 Gens</h2>';
   if (S.figli.length) h += `<div class="card"><h3>Enfants</h3>${S.figli.map(f => `<div class="row"><span>${f.gen === 'M' ? '👦' : '👧'} ${f.nome}</span><span class="mut">${f.eta} ans</span></div>`).join('')}</div>`;
   if (S.gravidanza) h += `<div class="card">🤰 Bébé attendu dans ${S.gravidanza.gg} jours.</div>`;
+  h += cardPersoneQui(personeQui(S.q, S.loc).filter(p => !S.png.includes(p)), 'Autour de toi maintenant');
   const ord = [...S.png].sort((a, b) => (b.id === S.partner) - (a.id === S.partner) || b.aff - a.aff);
-  h += '<div class="card">' + ord.map(p => `<div class="person" onclick="apriChat('${p.id}')">${avatarHtml(p)}<div class="n"><b>${p.nome} ${p.cognome}</b> <span class="mut">${p.eta}</span><div class="mut">${p.mest || ruoloTxt(p)}${p.stato !== 'conoscente' ? ' · ' + STATO_LBL[p.stato] : ''} · ${trattiTxt(p)}</div><div class="mut">${presente(p) ? '🗣️ ici avec toi' : '📍 ' + doveSta(p).txt}${p.numero ? ' · 📱' : ''}</div><div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>`).join('') + '</div>';
+  if (!ord.length) h += '<div class="card"><h3>📒 Persone che conosci</h3><p class="mut">Nessuno, per ora. Parla con la gente nei luoghi e per strada: chiunque, dopo due parole, finisce qui con quello che sai di lui/lei.</p></div>';
+  else h += '<div class="card"><h3>📒 Persone che conosci</h3>' + ord.map(p => { const d = doveSta(p); const qui = presente(p); return `<div class="person" onclick="apriChat('${p.id}')">${avatarHtml(p)}<div class="n"><b>${nomeNoto(p)}</b>${p.noto?.eta ? ` <span class="mut">${p.eta}</span>` : ''}<div class="mut">${descrNota(p)}${p.stato !== 'conoscente' ? ' · ' + STATO_LBL[p.stato] : ''}</div><div class="mut">${qui ? '🗣️ ici avec toi' : p.numero ? '📱 tu as le numéro' : p.noto?.casa || p.fissa ? '📍 ' + (d ? d.txt : '') : '📍 tu ne sais pas où le/la trouver'}</div><div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>`; }).join('') + '</div>';
   return h;
 }
 function vMe() {
@@ -1274,12 +1345,13 @@ function renderModal() {
     if (p.comp === ga) azioni += act('🎂 Fêter son anniversaire', () => A.compleannoPNG(p.id), '3h · 20.000 Ar · affinité +12');
     if (romantic && !S.partner && p.stato === 'conoscente') azioni += act('💕 Se déclarer', () => conferma('💕 Te déclarer ?', `Tu demandes à <b>${p.nome}</b> de sortir avec toi. En cas de refus tu perds 10 d'affinité.`, () => A.fidanzati(p.id), 'Me déclarer'), `affinité ${p.aff} (il faut 55) · attirance ${p.rom || 0} (il faut 25)`);
     if (p.id === S.partner) { if (p.stato === 'fidanzato') azioni += act('💍 Demande en mariage', () => conferma('💍 Demander sa main ?', `Bague : <b>200.000 Ar</b>. Ensuite le mariage se célèbre à la Commune (Anosy).`, () => A.proponi(p.id), 'Demander'), 'bague 200.000 Ar'); if (p.stato === 'promesso') azioni += '<p class="mut">Va à la Commune (Anosy) pour célébrer le mariage.</p>'; if (['sposato', 'fidanzato'].includes(p.stato)) azioni += act('👶 Essayer d\'avoir un enfant', () => conferma('👶 Un enfant ?', `Avec ${p.nome}. Un bébé coûte ~60.000 Ar/mois et naît après 9 mois. Probabilité 50%.`, () => A.figlio(p.id), 'Essayons')); azioni += act('💔 Quitter', () => conferma('💔 Quitter ' + p.nome + '?', S.sposato ? '<b>Divorce :</b> tu perds la moitié de tes économies en banque et moral -20.' : 'Moral -20. On ne revient pas facilement en arrière.', () => A.lascia(p.id), 'Je quitte')); }
-    if (!noto) azioni = '<p class="mut">Prima fate due chiacchiere.</p>'; else { if (!p.numero && ui.canale !== 'no') azioni = act('📱 Demander le numéro', () => A.chiediNumero(p.id), 's\'il/elle t\'apprécie, il/elle te le donne') + azioni; if (!qui && d.q === S.q && d.poi === 'casa') azioni = act('🚪 Aller chez lui/elle', () => A.visita(p.id), '15 min') + azioni; if (!qui && d.q !== S.q) azioni = act(`🚌 Aller à ${Q(d.q).nome}`, () => { ui.modal = { tipo: 'vai', id: d.q }; render(); }, d.txt) + azioni; }
-    const statoCanale = qui ? `<span class="pill">🗣️ di persona</span>` : tel ? `<span class="pill">📞 al telefono</span>` : `<span class="pill" style="opacity:.7">📍 ${d.txt}${p.numero ? ' · il faut un smartphone' : noto ? ' · tu n\'as pas son numéro' : ''}</span>`;
-    e.innerHTML = `<div class="box"><div class="person">${avatarHtml(p)}<div class="n"><b>${noto ? p.nome + ' ' + p.cognome : (p.gen === 'M' ? 'Inconnu' : 'Inconnue')}</b>, ${p.eta} <div class="mut">${p.mest || ruoloTxt(p)}${noto ? ' · ' + p.quartiere + ' · ' + trattiTxt(p) : ''}</div>${statoCanale}<div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>
+    const saDove = noto && (p.noto?.casa || p.fissa || ['capo', 'collega', 'dipendente'].includes(p.ruolo));
+    if (!noto) azioni = '<p class="mut">Prima fate due chiacchiere.</p>'; else { if (!p.numero && ui.canale !== 'no') azioni = act('📱 Demander le numéro', () => A.chiediNumero(p.id), 's\'il/elle t\'apprécie, il/elle te le donne') + azioni; if (!qui && saDove && d && d.q === S.q && d.poi === 'casa' && p.noto?.casa) azioni = act('🚪 Aller chez lui/elle', () => A.visita(p.id), '15 min') + azioni; if (!qui && saDove && d && d.q !== S.q) azioni = act(`🚌 Aller à ${Q(d.q).nome}`, () => { ui.modal = { tipo: 'vai', id: d.q }; render(); }, d.txt) + azioni; }
+    const statoCanale = qui ? `<span class="pill">🗣️ di persona</span>` : tel ? `<span class="pill">📞 al telefono</span>` : `<span class="pill" style="opacity:.7">📍 ${saDove && d ? d.txt : 'tu ne sais pas où il/elle est'}${p.numero ? ' · il faut un smartphone' : noto ? ' · tu n\'as pas son numéro' : ''}</span>`;
+    e.innerHTML = `<div class="box"><div class="person">${avatarHtml(p)}<div class="n"><b>${nomeNoto(p)}</b>${p.noto?.eta ? ', ' + p.eta : ''} <div class="mut">${noto ? descrNota(p) : (attivitaTxt(p) || p.mest || '')}</div>${statoCanale}<div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>
     <div class="chat" id="chatBox">${p.storia.slice(-8).map(m => `<div class="msg ${m.role === 'user' ? 'me' : 'them'}">${esc(m.content)}</div>`).join('') || '<div class="mut">Commence la conversation. « Salama ! » ouvre toutes les portes.</div>'}</div>
     ${ui.canale === 'no' ? '<p class="mut">Non è qui: raggiungilo/a, oppure chiama/scrivi se hai il suo numero e uno smartphone.</p>' : '<div style="display:flex;gap:6px"><input id="chatIn" placeholder="' + (ui.canale === 'tel' ? 'Message ou appel…' : 'Écris quelque chose…') + '" autocomplete="off"><button class="sec" id="chatSend">➤</button></div>'}
-    <details style="margin-top:8px"><summary class="mut">Azioni con ${p.nome}</summary>${azioni}</details></div>`;
+    ${noto ? schedaNota(p) : ''}<details style="margin-top:8px"><summary class="mut">Azioni</summary>${azioni}</details></div>`;
     const send = async () => { const t = $('chatIn').value.trim(); if (!t) return; $('chatIn').value = ''; const box = $('chatBox'); box.innerHTML += `<div class="msg me">${esc(t)}</div><div class="msg them mut" id="typing">…</div>`; box.scrollTop = 1e9; const r = await parla(p, t); const ty = $('typing'); if (ty) { ty.textContent = r; ty.classList.remove('mut'); ty.id = ''; } box.scrollTop = 1e9; renderHeader(); salva(); };
     if ($('chatSend')) { $('chatSend').onclick = send; $('chatIn').onkeydown = ev => { if (ev.key === 'Enter') send(); }; }
     $('chatBox').scrollTop = 1e9;
