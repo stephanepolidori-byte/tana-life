@@ -9,7 +9,7 @@ const ROOT = __dirname;
 const SAVE_DIR = path.join(ROOT, 'saves');
 if (!fs.existsSync(SAVE_DIR)) fs.mkdirSync(SAVE_DIR);
 
-let settings = { provider: 'auto', openaiKey: process.env.OPENAI_API_KEY || '', anthropicKey: process.env.ANTHROPIC_API_KEY || '', model: '' };
+let settings = { provider: 'auto', geminiKey: process.env.GEMINI_API_KEY || '', groqKey: process.env.GROQ_API_KEY || '', openaiKey: process.env.OPENAI_API_KEY || '', anthropicKey: process.env.ANTHROPIC_API_KEY || '', model: '' };
 const SETTINGS_FILE = path.join(ROOT, 'settings.json');
 try { settings = { ...settings, ...JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')) }; } catch {}
 
@@ -25,33 +25,63 @@ function body(req) {
 function safeId(s) { return String(s || 'default').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 40) || 'DEFAULT'; }
 
 // ---------- AI ----------
-function activeProvider() {
-  if (settings.provider === 'openai' && settings.openaiKey) return 'openai';
-  if (settings.provider === 'anthropic' && settings.anthropicKey) return 'anthropic';
-  if (settings.provider === 'auto') { if (settings.openaiKey) return 'openai'; if (settings.anthropicKey) return 'anthropic'; }
-  return 'none';
+function providers() {
+  const all = [['gemini', settings.geminiKey], ['groq', settings.groqKey], ['openai', settings.openaiKey], ['anthropic', settings.anthropicKey]].filter(x => x[1]).map(x => x[0]);
+  if (settings.provider && settings.provider !== 'auto') return all.includes(settings.provider) ? [settings.provider, ...all.filter(p => p !== settings.provider)] : all;
+  return all; // auto: prima i gratuiti (Gemini, Groq), poi gli altri
 }
-async function askAI(system, messages) {
-  const p = activeProvider();
+function activeProvider() { return providers()[0] || 'none'; }
+const cooldown = {}; // provider -> timestamp fino a cui è in pausa (rate limit)
+async function callProvider(p, system, messages) {
+  if (p === 'gemini') {
+    const model = (settings.provider === 'gemini' && settings.model) || 'gemini-2.0-flash';
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiKey}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), generationConfig: { maxOutputTokens: 350, temperature: 0.9 }, safetySettings: ['HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH', 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT'].map(c => ({ category: c, threshold: 'BLOCK_ONLY_HIGH' })) })
+    });
+    const j = await r.json();
+    if (!r.ok) { const e = new Error(j.error?.message || 'Gemini error'); e.status = r.status; throw e; }
+    return (j.candidates?.[0]?.content?.parts || []).map(x => x.text || '').join('').trim();
+  }
+  if (p === 'groq') {
+    const model = (settings.provider === 'groq' && settings.model) || 'llama-3.3-70b-versatile';
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + settings.groqKey },
+      body: JSON.stringify({ model, max_tokens: 350, temperature: 0.9, messages: [{ role: 'system', content: system }, ...messages] })
+    });
+    const j = await r.json();
+    if (!r.ok) { const e = new Error(j.error?.message || 'Groq error'); e.status = r.status; throw e; }
+    return j.choices[0].message.content.trim();
+  }
   if (p === 'openai') {
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + settings.openaiKey },
-      body: JSON.stringify({ model: settings.model || 'gpt-4o-mini', max_tokens: 300, temperature: 0.9, messages: [{ role: 'system', content: system }, ...messages] })
+      body: JSON.stringify({ model: (settings.provider === 'openai' && settings.model) || 'gpt-4o-mini', max_tokens: 350, temperature: 0.9, messages: [{ role: 'system', content: system }, ...messages] })
     });
     const j = await r.json();
-    if (!r.ok) throw new Error(j.error?.message || 'OpenAI error');
+    if (!r.ok) { const e = new Error(j.error?.message || 'OpenAI error'); e.status = r.status; throw e; }
     return j.choices[0].message.content.trim();
   }
   if (p === 'anthropic') {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': settings.anthropicKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: settings.model || 'claude-3-5-haiku-latest', max_tokens: 300, system, messages })
+      body: JSON.stringify({ model: (settings.provider === 'anthropic' && settings.model) || 'claude-3-5-haiku-latest', max_tokens: 350, system, messages })
     });
     const j = await r.json();
-    if (!r.ok) throw new Error(j.error?.message || 'Anthropic error');
+    if (!r.ok) { const e = new Error(j.error?.message || 'Anthropic error'); e.status = r.status; throw e; }
     return j.content.map(c => c.text || '').join('').trim();
   }
-  return null; // nessuna AI: il client usa il motore interno
+  return null;
+}
+// Prova i provider in ordine; se uno è in rate limit (429) o in errore, passa al successivo.
+async function askAI(system, messages) {
+  const now = Date.now(); let lastErr = null, used = 'none';
+  for (const p of providers()) {
+    if (cooldown[p] && cooldown[p] > now) continue;
+    try { const t = await callProvider(p, system, messages); if (t) { used = p; return { text: t, ai: p }; } }
+    catch (e) { lastErr = e; if (e.status === 429 || e.status === 503) cooldown[p] = now + 60 * 1000; console.warn('AI', p, e.message); }
+  }
+  return { text: null, ai: 'none', error: lastErr && lastErr.message };
 }
 
 const server = http.createServer(async (req, res) => {
@@ -61,12 +91,14 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/health') return json(res, 200, { ok: true, ai: activeProvider() });
 
     if (url.pathname === '/api/settings' && req.method === 'GET')
-      return json(res, 200, { provider: settings.provider, model: settings.model, hasOpenai: !!settings.openaiKey, hasAnthropic: !!settings.anthropicKey, active: activeProvider() });
+      return json(res, 200, { provider: settings.provider, model: settings.model, hasGemini: !!settings.geminiKey, hasGroq: !!settings.groqKey, hasOpenai: !!settings.openaiKey, hasAnthropic: !!settings.anthropicKey, active: activeProvider() });
     if (url.pathname === '/api/settings' && req.method === 'POST') {
       const b = await body(req);
       if (process.env.ADMIN_KEY && b.adminKey !== process.env.ADMIN_KEY) return json(res, 403, { error: 'Chiave amministratore errata' });
       if (b.provider) settings.provider = b.provider;
       if (typeof b.model === 'string') settings.model = b.model;
+      if (b.geminiKey !== undefined && b.geminiKey !== '••••') settings.geminiKey = b.geminiKey;
+      if (b.groqKey !== undefined && b.groqKey !== '••••') settings.groqKey = b.groqKey;
       if (b.openaiKey !== undefined && b.openaiKey !== '••••') settings.openaiKey = b.openaiKey;
       if (b.anthropicKey !== undefined && b.anthropicKey !== '••••') settings.anthropicKey = b.anthropicKey;
       fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
@@ -90,8 +122,8 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === '/api/chat' && req.method === 'POST') {
       const b = await body(req);
-      const text = await askAI(b.system, b.messages);
-      return json(res, 200, { text, ai: activeProvider() });
+      const out = await askAI(b.system, (b.messages || []).slice(-14));
+      return json(res, 200, { text: out.text, ai: out.ai, error: out.error });
     }
 
     // static
