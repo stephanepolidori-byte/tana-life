@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: malagasy-real-life-simulator
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+    disk:
+      name: saves
+      mountPath: /opt/render/project/src/saves
+      sizeGB: 1
