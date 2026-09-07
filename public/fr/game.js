@@ -76,7 +76,7 @@ const POI = {
   casa: { nome: 'Chez toi', icon: '🏠' },
   lavoro: { nome: 'Ton lieu de travail', icon: '💼' },
 };
-const MULT_CIBO = [0, 0.9, 1, 1.1, 1.25, 1.4];   // per tier quartiere
+const MULT_CIBO = [0, 0.9, 1, 1.1, 1.25, 1.4]; const MULT_CIBO_BASE = [...MULT_CIBO];   // per tier quartiere
 const MULT_CASA = [0, 0.7, 1, 1.3, 1.8, 2.5];
 const MULT_CASA_CENTRO = 2.8; // Analakely/Behoririka: pieno centro, affitti sopra Ivandry/Ambatobe
 const multCasa = q => q.centro ? MULT_CASA_CENTRO : MULT_CASA[q.tier];
@@ -405,7 +405,7 @@ function nuovaPartita(nome, gen, eta) {
     lavoro: 'nulla', ggLavorati: 0, esp: 0, perf: 50, capo: null,
     attivita: null, q: 'analakely', loc: null, malattie: [],
     png: [], partner: null, sposato: false, figli: [], gravidanza: null,
-    log: [], fedina: 0, stat: { gg: 0, pasti: 0, lavate: 0 }, flags: {},
+    log: [], fedina: 0, stat: { gg: 0, pasti: 0, lavate: 0 }, flags: {}, eco: { inflazione: 1, vendite: 0, spesaGiocatore: 0, mese: 0 },
   };
   S.folla = [];
   { const a = nuovoPNG('sconosciuto', { aff: 20, eta: eta + rnd(-3, 3), extra: { quartiere: Q(S.q).nome } }); a.mest = pick(['apprenti mécanicien', 'vendeur ambulant', 'étudiant(e)']); generaVita(a, { casaQ: S.q }); a.qui = { q: S.q, poi: null, gg: 0, da: 6, a: 10 }; a.attivitaVisibile = 'assis(e) sur le muret, a l\'air du quartier'; S.folla.push(a); }
@@ -451,6 +451,71 @@ const IMPRESSIONI_TUTTE = ['à l\'air sympathique', 'à l\'air snob', 'à l\'air
 const STORIE = { origine: ['né(e) ici à Tana', 'arrivé(e) de Fianarantsoa adolescent(e)', 'a grandi à Antsirabe, à Tana depuis 10 ans', 'famille originaire de Toamasina', 'venu(e) de la campagne (Itasy) pour chercher du travail', 'a grandi à Ambohimanga'], famiglia: ['vit avec ses parents et trois frères', 'marié(e) avec deux jeunes enfants', 'veuf/veuve, une fille à l\'université', 'célibataire, envoie de l\'argent à sa mère en province', 'divorcé(e), un fils qui vit chez la grand-mère', 'marié(e), le conjoint travaille en zone franche', 'fiancé(e) depuis trois ans, attend d\'avoir l\'argent pour le vodiondry'], problema: ['a des dettes chez un usurier du quartier', 'son père est malade et les médicaments coûtent cher', 'le loyer a deux mois de retard', 'rêve d\'ouvrir une petite boutique mais n\'a pas le capital', 'a perdu son travail à l\'usine l\'an dernier', 'économise pour le permis', 'se dispute toujours avec son frère pour la maison familiale', 'voudrait émigrer à Mayotte ou en France', 'un fils doit payer l\'inscription au lycée'], passione: ['supporte les Barea et joue au foot le dimanche', 'chante dans la chorale de l\'église', 'suit les telenovelas brésiliennes', 'adore le hira gasy', 'joue au fanorona avec les anciens du quartier', 'cultive un potager derrière la maison', 'collectionne les téléphones cassés à réparer', 'va danser le samedi à Antaninarenina'] };
 const MEST_M = ['tailleur', 'vendeur ambulant', 'chauffeur de taxi', 'maçon', 'ouvrier de la zone franche', 'coiffeur', 'mécanicien', 'gardien', 'enseignant(e)', 'employé dans un bureau', 'menuisier', 'chauffeur de taxi-be', 'receveur de taxi-be', 'cuisinier dans un hotely', 'paysan qui vend au marché', 'étudiant', 'sans emploi, fait des petits boulots', 'retraité', 'petit commerçant'];
 const MEST_F = ['couturière', 'vendeuse ambulante', 'ouvrière de la zone franche', 'vendeuse en boutique', 'coiffeuse', 'enseignant(e)', 'infirmière', 'employée dans un bureau', 'lavandière', 'cuisinière dans un hotely', 'paysanne qui vend au marché', 'étudiante', 'sans emploi, fait des petits boulots', 'femme au foyer', 'retraitée', 'petite commerçante', 'vendeuse au marché'];
+/* ---------- ECONOMIA DEI PERSONAGGI ----------
+ Ogni PNG ha: soldi (contanti), risparmi, stipendio mensile reale per il suo mestiere, casa (affitto o proprietà), veicolo.
+ Ogni mese (1°) incassa lo stipendio, paga affitto + spese vive, e decide se cambiare casa/lavoro/veicolo. Tutti i movimenti passano da movEco() → i conti tornano sempre. */
+const STIPENDI = [
+  [/student|ragazz|garçon|étudiant/i, 0, 0], [/pension|retrait/i, 120000, 350000], [/casalinga|femme au foyer/i, 0, 0], [/disoccup|sans emploi/i, 80000, 160000],
+  [/zona franca|zone franche|operai|ouvri/i, 250000, 320000], [/ambulante|arachidi|mofo gasy|schede|gelati|glaces|cartes/i, 150000, 280000], [/mercato|marché|contadin|paysan|brèdes|riso al|riz au|frutta|fruits/i, 200000, 400000],
+  [/tassista|taxi|chauffeur/i, 350000, 600000], [/muratore|maçon|falegname|menuisier|tiratore|tireur/i, 200000, 350000], [/sart|tailleur|couturi|parrucch|coiff|lavandaia|lavandière/i, 180000, 320000],
+  [/meccanico|mécanicien/i, 300000, 550000], [/guardian|gardien|custode/i, 200000, 300000], [/insegnante|enseignant|professor/i, 400000, 800000], [/infermier|infirmi/i, 450000, 750000], [/medico|médecin/i, 1200000, 2500000],
+  [/impiegat|employé|bancari|banque|agente immobiliare|agent immobilier|agenzia|agence/i, 500000, 1100000], [/commess|cassier|caissi|vendeuse en/i, 250000, 400000], [/cuoc|cuisini|camerier|serveur|barista|barman|hotely/i, 220000, 380000],
+  [/proprietari|propriétaire|grossista|grossiste|commerciante|commerçant|capo della|chef de la|venditore di auto|voitures/i, 700000, 2500000], [/pastore|pasteur|allenatore|entraîneur|istruttore|coach|guida|guide/i, 300000, 600000], [/poliziotto|agente di polizia|agent de police/i, 400000, 650000],
+  [/capo|chef|direttore|directeur|quadro|cadre/i, 1200000, 3000000], [/dipendente|employé du/i, 250000, 300000]
+];
+function stipendioPer(mest) { for (const [re, a, b] of STIPENDI) if (re.test(mest || '')) return a ? Math.round(rnd(a, b) / 10000) * 10000 : 0; return Math.round(rnd(200000, 450000) / 10000) * 10000; }
+function casePer(qid) { return CASE.filter(c => c.q === qid && !['terreno', 'strada', 'costruita'].includes(c.tipo)); }
+function redditoPNG(p) { const E = p.eco; return (E.stipendio || 0) + (E.rendita || 0) + (E.coniuge || 0); }
+function scegliCasaPNG(p) { const red = redditoPNG(p); const opts = casePer(p.vita.casaQ).filter(c => c.affitto > 0).sort((a, b) => a.affitto - b.affitto); const ok = opts.filter(c => c.affitto <= red * 0.35); const c = ok.length ? ok[ok.length - 1] : null; return c ? { id: c.id, affitto: c.affitto, famiglia: false } : { id: null, affitto: 0, famiglia: true }; }
+function generaEconomia(p) {
+  if (p.eco) return p.eco;
+  if (['capo', 'collega'].includes(p.ruolo) && S.lavoro !== 'nulla') { const l = lavoro(); const mens = l.tipo === 'mese' ? l.paga : l.paga * 24; p.mest = p.mest || (p.ruolo === 'capo' ? 'responsable — ' + l.nome : l.nome); var stip = p.ruolo === 'capo' ? Math.round(mens * rnd(2.5, 4) / 10000) * 10000 : Math.round(mens * rnd(0.95, 1.15) / 10000) * 10000; }
+  const E = p.eco = { stipendio: stip ?? stipendioPer(p.mest), rendita: 0, coniuge: 0, soldi: 0, risparmi: 0, casa: null, affitto: 0, prop: false, famiglia: false, veicolo: null, debiti: 0, storico: [] };
+  const st = p.vita?.storia || {}; if (/sposat|marié|coniuge|conjoint/.test(st.famiglia || '')) E.coniuge = Math.round(rnd(150000, 400000) / 10000) * 10000;
+  if (/genitori|parents|nonna|grand-mère|zia|tante/.test(st.famiglia || '') || p.eta < 22) E.famiglia = true;
+  if (/debiti|dettes|usuraio|usurier|affitto è in ritardo|loyer a deux/.test(st.problema || '')) E.debiti = Math.round(rnd(100000, 600000) / 10000) * 10000;
+  const red = redditoPNG(p);
+  if (!E.famiglia) { const c = scegliCasaPNG(p); E.casa = c.id; E.affitto = c.affitto; E.famiglia = c.famiglia; }
+  if (p.eta >= 40 && red >= 1500000 && Math.random() < 0.5) { const own = casePer(p.vita.casaQ).filter(c => c.prezzo > 0 && c.prezzo <= red * 60); if (own.length) { E.casa = pick(own).id; E.prop = true; E.affitto = 0; E.famiglia = false; } }
+  E.risparmi = Math.round(Math.max(0, red * rnd(0, p.eta >= 35 ? 8 : 3) - E.debiti) / 1000) * 1000; E.soldi = Math.round(rnd(0.05, 0.4) * Math.max(red, 100000) / 500) * 500;
+  if (red >= 400000 && Math.random() < 0.5) E.veicolo = 'bici'; if (red >= 900000 && Math.random() < 0.5) E.veicolo = 'moto'; if (red >= 1800000 && Math.random() < 0.5) E.veicolo = 'r4'; if (red >= 2500000 && Math.random() < 0.4) E.veicolo = 'peugeot';
+  return E;
+}
+function movEco(p, delta, motivo) { // UNICO punto in cui cambiano i soldi di un PNG: conservazione garantita e storico
+  const E = p.eco || generaEconomia(p); delta = Math.round(delta); const prima = E.soldi + E.risparmi;
+  if (delta < 0 && E.soldi + delta < 0) { const manca = -(E.soldi + delta); const daRisp = Math.min(manca, E.risparmi); E.risparmi -= daRisp; E.soldi += daRisp; }
+  E.soldi += delta; if (E.soldi < 0) { E.debiti += -E.soldi; E.soldi = 0; }
+  E.storico.push({ g: S.stat.gg, d: delta, m: motivo }); if (E.storico.length > 24) E.storico.shift(); return (E.soldi + E.risparmi) - prima;
+}
+function puoDarePNG(p, n) { const E = p.eco || generaEconomia(p); return E.soldi + E.risparmi >= n; }
+function trasferisci(p, n, motivo) { // soldi dal PNG al giocatore (n>0) o dal giocatore al PNG (n<0); i conti tornano sempre
+  n = Math.round(n); if (n > 0) { if (!puoDarePNG(p, n)) return 0; movEco(p, -n, motivo); S.soldi += n; return n; }
+  if (n < 0) { const m = Math.min(-n, S.soldi); if (m <= 0) return 0; S.soldi -= m; movEco(p, m, motivo); return -m; } return 0;
+}
+function meseEcoPNG(p) {
+  const E = p.eco || generaEconomia(p); const inf = S.eco.inflazione; const st = p.vita?.storia || {};
+  if (E.stipendio) movEco(p, E.stipendio, 'stipendio'); if (E.coniuge) movEco(p, E.coniuge, 'revenu du conjoint'); if (E.rendita) movEco(p, E.rendita, 'rendita');
+  const vive = Math.round((E.famiglia ? 60000 : 120000 + (E.coniuge ? 80000 : 0)) * inf + (/figli|enfants|fils|figlia|fille/.test(st.famiglia || '') ? 90000 * inf : 0));
+  movEco(p, -vive, 'dépenses courantes'); if (E.affitto) movEco(p, -E.affitto, 'affitto'); if (E.veicolo) movEco(p, -Math.round((VEICOLI.find(v => v.id === E.veicolo)?.costo || 0) * 20 * inf), 'carburante/manutenzione');
+  if (E.debiti > 0) { const rata = Math.min(E.debiti, Math.round(redditoPNG(p) * 0.15)); if (rata > 0 && E.soldi >= rata) { movEco(p, -rata, 'mensualité de dette'); E.debiti -= rata; } else E.debiti = Math.round(E.debiti * 1.05); }
+  const soglia = Math.max(60000, redditoPNG(p) * 0.5); if (E.soldi > soglia) { const r = Math.round((E.soldi - soglia) / 2); E.soldi -= r; E.risparmi += r; }
+  const ev = []; const idx = v => VEICOLI.findIndex(x => x.id === v);
+  if (!['capo', 'collega', 'dipendente'].includes(p.ruolo)) {
+    if (E.stipendio && Math.random() < 0.04) { const nuovo = Math.round(E.stipendio * (Math.random() < 0.65 ? rnd(1.1, 1.4) : rnd(0.6, 0.9)) / 10000) * 10000; ev.push(nuovo > E.stipendio ? `a trouvé un meilleur travail (${Ar(nuovo)} Ar/mois)` : `a perdu son poste et se débrouille maintenant avec ${Ar(nuovo)} Ar/mois`); E.stipendio = nuovo; }
+    else if (!E.stipendio && !/student|pension|casalinga|étudiant|retrait|foyer/.test(p.mest || '') && Math.random() < 0.25) { E.stipendio = stipendioPer('disoccupato'); ev.push('a repris les petits boulots'); }
+  }
+  const red = redditoPNG(p);
+  if (!E.prop) {
+    if (E.affitto && (E.affitto > red * 0.5 || E.soldi + E.risparmi < E.affitto)) { const c = scegliCasaPNG(p); if (c.id !== E.casa) { ev.push(c.id ? `a dû déménager dans un logement moins cher (${CASE.find(x => x.id === c.id).nome})` : 'n\'arrive plus à payer le loyer : est retourné(e) vivre chez ses parents'); E.casa = c.id; E.affitto = c.affitto; E.famiglia = c.famiglia; } }
+    else if (red >= 500000 && Math.random() < 0.08) { const c = scegliCasaPNG(p); if (c.id && c.affitto > E.affitto * 1.3) { ev.push(`a emménagé dans un meilleur logement (${CASE.find(x => x.id === c.id).nome})`); E.casa = c.id; E.affitto = c.affitto; E.famiglia = false; } }
+    const own = casePer(p.vita.casaQ).filter(c => c.prezzo > 0 && c.prezzo <= E.risparmi); if (own.length && Math.random() < 0.5) { const c = own[own.length - 1]; E.risparmi -= c.prezzo; E.casa = c.id; E.prop = true; E.affitto = 0; E.famiglia = false; ev.push(`a ACHETÉ un logement : ${c.nome} (${Ar(c.prezzo)} Ar)`); S.eco.vendite++; }
+  }
+  const want = red >= 2500000 ? 'peugeot' : red >= 1800000 ? 'r4' : red >= 900000 ? 'moto' : red >= 400000 ? 'bici' : null;
+  if (want && idx(want) > idx(E.veicolo) && E.risparmi >= VEICOLI[idx(want)].prezzo * 1.5 && Math.random() < 0.3) { const v = VEICOLI[idx(want)]; E.risparmi -= v.prezzo; if (E.veicolo) E.risparmi += Math.round(VEICOLI[idx(E.veicolo)].prezzo * 0.5); E.veicolo = v.id; ev.push(`a acheté ${v.nome}`); }
+  else if (E.veicolo && E.soldi + E.risparmi < 50000 && E.debiti > 0) { const v = VEICOLI[idx(E.veicolo)]; movEco(p, Math.round(v.prezzo * 0.5), 'vendita ' + v.nome); E.veicolo = null; ev.push(`a vendu ${v.nome} pour payer ses dettes`); }
+  ev.forEach(t => { ricorda(p, t); if (S.png.includes(p) && p.aff >= 35) log(`📰 ${nomeNoto(p)} ${t}.`, 'info'); });
+}
+function ecoTxt(p) { const E = p.eco || generaEconomia(p); const c = E.casa ? CASE.find(x => x.id === E.casa) : null; return `TON ARGENT (réel, n'en invente pas d'autre) : en poche ${Ar(E.soldi)} Ar, économies ${Ar(E.risparmi)} Ar${E.debiti ? ', dettes ' + Ar(E.debiti) + ' Ar' : ''}; revenu ${Ar(redditoPNG(p))} Ar/mois${E.stipendio ? ' (stipendio ' + Ar(E.stipendio) + ')' : ''}. LOGEMENT : ${E.famiglia ? 'tu vis chez tes parents' : c ? (E.prop ? 'tu es propriétaire de ' : 'affitti ') + c.nome + (E.affitto ? ' a ' + Ar(E.affitto) + ' Ar/mois' : '') : 'logement précaire'}. ${E.veicolo ? 'Tu as ' + VEICOLI.find(v => v.id === E.veicolo).nome + '.' : 'Tu te déplaces en taxi-be ou à pied.'} Si tu donnes ou prêtes de l'argent, utilise le tag avec le montant exact : il te sera vraiment retiré ; tu ne peux pas donner plus que ce que tu as en poche (${Ar(E.soldi)} Ar).`; }
 function etaTxt(p) { const M = p.gen === 'M'; return p.eta < 18 ? (M ? 'garçon' : 'fille') : p.eta < 30 ? (M ? 'jeune homme' : 'jeune femme') : p.eta < 50 ? (M ? 'homme' : 'femme') : p.eta < 65 ? (M ? 'monsieur d\'âge mûr' : 'dame d\'âge mûr') : (M ? 'vieil homme' : 'vieille dame'); }
 function poiIn(qid, pref) { const l = Q(qid).poi; for (const x of pref) if (l.includes(x)) return x; return null; }
 function generaVita(p, opts = {}) {
@@ -475,6 +540,7 @@ function generaVita(p, opts = {}) {
     storia: { origine: pick(STORIE.origine), famiglia: p.eta < 22 ? pick(['vit avec ses parents et trois frères', 'vit chez sa grand-mère', 'vit chez sa tante en ville']) : pick(STORIE.famiglia), problema: pick(STORIE.problema), passione: pick(STORIE.passione) } };
   p.impressione = Math.random() < 0.6 ? IMPRESSIONI[p.tratti[0]] : pick(IMPRESSIONI_TUTTE);
   p.noto = p.noto || { nome: false, eta: false, mest: false, casa: false, storia: [], tratti: [] };
+  p.eco = null; generaEconomia(p);
   return p;
 }
 function figuraNuova(qid, poi, mest, fissa) {
@@ -534,6 +600,8 @@ function schedaNota(p) {
   righe.push(`<b>Métier :</b> ${p.noto.mest || p.fissa ? (p.mest || ruoloTxt(p)) : '?'}`); righe.push(`<b>Habite :</b> ${p.noto.casa ? p.quartiere : '?'}`);
   righe.push(`<b>Caractère :</b> ${p.noto.tratti.length ? p.noto.tratti.map(t => TRATTI_LBL[t] || t).join(', ') : 'au feeling : ' + (p.impressione || '?')}`);
   const sto = p.noto.storia.map(k => st[k]).filter(Boolean); righe.push(`<b>Vie :</b> ${sto.length ? sto.join('; ') : '?'}`);
+  if (p.noto.mest || p.fissa) { const E = p.eco; const c = E && E.casa ? CASE.find(x => x.id === E.casa) : null; righe.push(`<b>Niveau de vie :</b> ${redditoPNG(p) >= 1500000 ? 'benestante' : redditoPNG(p) >= 500000 ? 'classe moyenne' : redditoPNG(p) >= 200000 ? 'modesto' : 'povero'}${p.noto.casa && E ? (E.famiglia ? ', vit chez ses parents' : c ? ', ' + (E.prop ? 'propriétaire de ' : 'en location dans ') + c.nome.toLowerCase() : '') : ''}${E && E.veicolo && p.noto.casa ? ', a ' + VEICOLI.find(v => v.id === E.veicolo).nome.toLowerCase() : ''}`); }
+  if (p.debito) righe.push(`<b>T'a prêté :</b> ${Ar(p.debito)} Ar (à rendre)`);
   if (p.incontro) righe.push(`<b>Rencontre :</b> ${p.incontro}`);
   if (p.numero) righe.push('📱 tu as son numéro');
   return `<details style="margin-top:6px"><summary class="mut">Ce que tu sais de cette personne</summary><p class="mut" style="line-height:1.7">${righe.join('<br>')}</p></details>`;
@@ -596,6 +664,16 @@ function iniziativaPNG() {
   if (p.aff < 15 && S.voci && S.voci.length && Math.random() < 0.3) msgs.push({ t: `${p.nome} t'évite dans la rue : quelqu'un lui a dit du mal de toi.`, neg: 1 });
   if (!msgs.length) return; const m = pick(msgs); log('📱 ' + m.t, m.neg ? 'bad' : 'info'); if (m.act) m.act();
 }
+function economiaMensile() {
+  // Economia cittadina: inflazione reale (~8%/anno) + impatto del giocatore (spesa, attività, acquisti) e delle vite simulate dei PNG. Prezzi e affitti seguono l'indice.
+  if (!S.eco) S.eco = { inflazione: 1, vendite: 0, spesaGiocatore: 0, mese: 0 };
+  S.eco.mese++; [...S.png, ...folla()].forEach(p => { if (p.vita) meseEcoPNG(p); });
+  const spinta = Math.min(0.01, S.eco.spesaGiocatore / 50000000) + (S.attivita ? 0.001 : 0) + S.eco.vendite * 0.0005;
+  S.eco.inflazione = Math.round(S.eco.inflazione * (1 + 0.08 / 12 + spinta) * 10000) / 10000; S.eco.spesaGiocatore = 0; S.eco.vendite = 0;
+  applicaIndice();
+  if (S.eco.mese % 3 === 0) log(`📈 Coût de la vie à Tana : indice ${Math.round(S.eco.inflazione * 100)} (prix et loyers mis à jour).`, 'info');
+}
+function applicaIndice() { const idx = (S.eco && S.eco.inflazione) || 1; MULT_CIBO.forEach((m, i) => { if (i) MULT_CIBO[i] = MULT_CIBO_BASE[i] * idx; }); CASE.forEach(c => { if (c.baseAff == null) { c.baseAff = c.affitto; c.basePr = c.prezzo; } c.affitto = Math.round(c.baseAff * idx / 1000) * 1000; c.prezzo = Math.round(c.basePr * idx / 100000) * 100000; }); }
 function nuovoGiorno(d) {
   S.stat.gg++;
   pulisciFolla(); S.png.forEach(p => { p.visita = false; });
@@ -607,6 +685,7 @@ function nuovoGiorno(d) {
   // cibo fresco che va a male
   Object.entries(FRESCHI).forEach(([k, lim]) => { if (S.disp[k] > 0 && S.fresco[k] !== undefined) { const eta = S.stat.gg - S.fresco[k]; const max = ha('frigo') ? lim * 4 : lim; if (eta > max) { log(`${NOMI_DISP[k]} a pourri (${S.disp[k]} jetés). ${ha('frigo') ? '' : 'Un frigo le ferait durer 4 fois plus longtemps.'}`, 'bad'); S.disp[k] = 0; } } });
   if (d.getDate() === 1) {
+    economiaMensile();
     if (c.affitto > 0) {
       if (paga(c.affitto, true)) log(`Tu as payé le loyer : ${Ar(c.affitto)} Ar.`, 'info');
       else { S.flags.arretrati = (S.flags.arretrati || 0) + 1; log(`Tu n'as pas payé le loyer (${Ar(c.affitto)} Ar). Le propriétaire est furieux.`, 'bad'); if (S.flags.arretrati >= 2) { S.casa = 'strada'; S.flags.arretrati = 0; log('Tu as été expulsé(e). Tu es de nouveau à la rue.', 'bad'); } }
@@ -655,6 +734,7 @@ function eventoCasuale() {
 function morte() { if (S.morto) return; S.morto = true; S.bis.salute = 0; ui.modal = { tipo: 'morte' }; render(); salva(); }
 async function nuovaVita() { const slot = codiceGiocatore(); S = null; ui.modal = null; ui.tab = 'home'; LS.del('tanalife'); LS.set('mrls_pid', nuovoCodice()); render(); try { await fetch('/api/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slot }) }); } catch (e) { } }
 function paga(n, auto = false) {
+  if (S.eco) S.eco.spesaGiocatore += Math.max(0, n);
   if (S.soldi >= n) { S.soldi -= n; return true; }
   if (auto && S.banca && S.banca.saldo + S.soldi >= n) { const m = n - S.soldi; S.banca.saldo -= m; S.soldi = 0; log(`Prélèvement automatique de ${Ar(m)} Ar sur le compte.`, 'info'); return true; }
   return false;
@@ -683,7 +763,7 @@ const A = {
   stendi() { if (S.pantoBagnati < 1) return toast('Tu n\'as pas de linge mouillé.'); avanza(15); log(`Tu as étendu ${S.pantoBagnati} vêtements au soleil.`); },
   pulisci() { S.sporcoCasa = 0; S.bis.umore = clamp(S.bis.umore + 5); skillUp('casa', 1); avanza(60); log('Tu as fait le ménage.'); },
   dormiOspite(h) { const o = S.ospite; if (!o || o.gg <= 0) return toast('Personne ne t\'héberge pour l\'instant.'); if (S.q !== o.q) return toast(`${o.nome} habite à ${Q(o.q).nome} : vas-y.`); const min = Math.round(h * 60); const prima = { ...S.bis }; S.flags.daOspite = true; S.bis.igiene = clamp(S.bis.igiene + 20); avanza(min, { sonno: true }); S.flags.daOspite = false; o.gg--; const p = png(o.id); if (p) { p.favoriRicevuti = p.favoriRicevuti || 0; if (Math.random() < 0.25) { p.aff = clamp(p.aff - 2); ricorda(p, 'loge chez moi, j\'espère qu\'il/elle aidera un peu'); } } log(`😴 Tu as dormi chez ${o.nome} (${Math.round(min / 60)}h) : énergie ${Math.round(prima.energia)} → ${Math.round(S.bis.energia)}. Nuits restantes : ${o.gg}.`, 'good'); if (o.gg <= 0) { log(`${o.nome} : « Namako, il est temps que tu trouves ton propre logement. » L'hébergement est terminé.`, 'info'); S.ospite = null; } },
-  restituisci(id) { const p = png(id); if (!p || !p.debito) return; if (!paga(p.debito)) return toast('Tu n\'as pas assez d\'argent.'); log(`Tu as rendu ${Ar(p.debito)} Ar à ${p.nome}. Affinité +6.`, 'good'); p.aff = clamp(p.aff + 6); p.favoriRicevuti = (p.favoriRicevuti || 0) + 1; ricorda(p, 'm\'a rendu l\'argent, personne sérieuse'); p.debito = 0; },
+  restituisci(id) { const p = png(id); if (!p || !p.debito) return; if (!paga(p.debito)) return toast('Tu n\'as pas assez d\'argent.'); movEco(p, p.debito, 'remboursement de prêt'); log(`Tu as rendu ${Ar(p.debito)} Ar à ${p.nome}. Affinité +6.`, 'good'); p.aff = clamp(p.aff + 6); p.favoriRicevuti = (p.favoriRicevuti || 0) + 1; ricorda(p, 'm\'a rendu l\'argent, personne sérieuse'); p.debito = 0; },
   aiutaOspite() { const o = S.ospite; const p = o && png(o.id); if (!p) return; if (S.q !== o.q) return toast(`Va à ${Q(o.q).nome}.`); avanza(120); S.bis.energia = clamp(S.bis.energia - 10); p.aff = clamp(p.aff + 5); p.favoriRicevuti = (p.favoriRicevuti || 0) + 1; skillUp('casa', 0.6); ricorda(p, 'm\'a aidé à la maison (ménage, eau, lessive)'); log(`Tu as aidé chez ${p.nome} : eau de la pompe, sols, lessive. Affinité +5.`, 'good'); },
   dormi(h, motivo) { const min = Math.round(h * 60); if (min < 10) return toast('Trop court pour dormir.'); if (!haCasa()) { S.bis.umore = clamp(S.bis.umore - 10); S.bis.igiene = clamp(S.bis.igiene - 10); } else if (S.loc !== 'casa') return toast('Rentre chez toi pour dormir (ou dors dans la rue si tu n\'as pas de logement).');
     const prima = { ...S.bis }; avanza(min, { sonno: true }); if (min >= 240 && S.pantoSporchi < 8) S.pantoSporchi++; if (!ha('materasso') && !ha('letto') && haCasa()) S.bis.energia = clamp(S.bis.energia - 10 * Math.min(1, min / 480));
@@ -753,7 +833,7 @@ const A = {
       <div class="row"><span>📅 Premier jour</span><b>${primo} à ${hh(l.inizio)}</b></div><div class="row"><span>⏰ Horaire</span><b>${orarioLavoro(l)}</b></div><div class="row"><span>📆 Jours</span><b>${giorniTxt(l)}</b></div><div class="row"><span>💰 Paie</span><b>${Ar(l.paga)} Ar/${l.tipo === 'mese' ? 'mois' : 'jour'}</b></div><div class="row"><span>📍 Où</span><b>${Q(l.luogo).nome} (${distKm(S.q, l.luogo)} km d'ici)</b></div><div class="row"><span>👥 Collègue</span><b>${c.nome} ${c.cognome}</b></div>
       <p class="mut" style="margin-top:8px">${l.tipo === 'giorno' ? 'Tu es payé(e) en fin de service : si tu n\'y vas pas, tu ne gagnes rien.' : 'Salaire le 1er du mois, proportionnel aux services effectués. Retards et absences baissent la performance (sous 15 = licenciement).'} Moral +15.</p><h3>Comment s'est passé l'entretien</h3>${lista}` };
   },
-  licenziati() { S.lavoro = 'nulla'; S.flags.inizioLavoro = null; log('Tu as démissionné.'); },
+  licenziati(daCapo) { S.lavoro = 'nulla'; S.flags.inizioLavoro = null; S.flags.bonus = 1; S.flags.promosso = false; log(daCapo ? '🚫 Licencié(e) : à partir d\'aujourd\'hui tu es sans emploi. Le chef et les collègues restent dans ta liste, mais tu ne travailles plus là.' : 'Tu as démissionné.', daCapo ? 'bad' : 'info'); },
   iscriviti(liv) { const s = SCUOLE.find(x => x.liv === liv); if (S.edu < liv - 1) return toast('Tu dois d\'abord terminer le niveau précédent.'); if (!paga(s.costo)) return toast(`Inscription : ${Ar(s.costo)} Ar.`); S.scuola = { liv, giorni: 0, tot: s.mesi * 20, voti: 0 }; const prof = nuovoPNG('professore', { aff: 10, eta: rnd(35, 65) }); const comp = nuovoPNG('compagno di scuola', { aff: 20, eta: S.eta + rnd(-2, 2) }); S.png.push(prof, comp); log(`Inscrit(e) : ${s.nome}. Professeur : ${prof.nome}. Cours 4h lun–ven, ${s.mesi} mois.`, 'good'); },
   studia() { if (!S.scuola) return; if (S.flags.scuolaOggi === now().toDateString()) return toast('Tu as déjà assisté aux cours aujourd\'hui.'); avanza(240); S.flags.scuolaOggi = now().toDateString(); S.scuola.giorni++; const v = (S.bis.energia > 40 ? 1 : 0) + (S.bis.fame > 30 ? 1 : 0) + (ha('pc') ? 1 : 0) + (ha('libri') ? 0.5 : 0); S.scuola.voti += v; skillUp('intelligenza', 0.5 + v * 0.2); skillUp('sociale', 0.2); if (S.scuola.giorni % 20 === 0) log(`Examen mensuel réussi. Progression : ${Math.round(S.scuola.giorni / S.scuola.tot * 100)}%.`, 'info'); if (S.scuola.giorni >= S.scuola.tot) { const media = S.scuola.voti / S.scuola.tot; if (media >= 1.2) { S.edu = S.scuola.liv; log(`🎓 Tu as obtenu : ${EDU[S.edu]}!`, 'good'); S.scuola = null; } else { log(`Recalé(e) (moyenne ${media.toFixed(1)}). Tu refais les 3 derniers mois.`, 'bad'); S.scuola.giorni -= 60; S.scuola.voti *= 0.75; } } },
   patente() { if (!paga(250000)) return toast('L\'auto-école coûte 250.000 Ar.'); avanza(180); if (Math.random() < 0.6 + S.skill.intelligenza / 300) { S.patente = true; skillUp('guida', 20); log('🚗 Tu as eu ton permis !', 'good'); } else log('Recalé(e) à l\'examen de conduite.', 'bad'); },
@@ -899,11 +979,14 @@ function sistemaPrompt(p) {
   const lav = l.id === 'nulla' ? 'sans emploi' : `${l.nome} a ${Q(l.luogo).nome} (${orarioLavoro(l)}, ${giorniTxt(l)}, ${l.tipo === 'mese' ? Ar(l.paga) + ' Ar/mois' : Ar(l.paga) + ' Ar/jour'})${sameJob ? `; performance au travail ${Math.round(S.perf)}/100, expérience ${S.esp} services, retards récents ${S.flags.ritardi || 0}` : ''}`;
   const poteri = [];
   poteri.push('OSPITA:n — tu offres un endroit pour dormir chez toi pendant n nuits (1-14). Seulement si affinité ≥ 55, ou ≥ 40 si le joueur est sans logement et te fait pitié ; tu peux demander un service en échange dans le texte (aide à la maison, lessive, un peu d’argent).');
-  poteri.push('PRESTA:n — tu prêtes n Ariary (max 20 000, seulement si affinité ≥ 50 ; le joueur devra les rendre).');
+  poteri.push('PRESTA:n — tu prêtes n Ariary de TON argent (seulement si affinité ≥ 50 et si tu les as ; le joueur devra les rendre).');
+  poteri.push('REGALA:n — tu offres n Ariary de ton argent (seulement par grande affinité ou pitié, et seulement si tu les as).');
+  poteri.push('CHIEDI:n — tu demandes n Ariary au joueur (une dette, un service, le prix de quelque chose que tu lui donnes) : s\'il accepte dans l\'action suivante, il paie vraiment.');
+  poteri.push('ASSUMI — si tu es un employeur (propriétaire, chef, grossiste, patronne d\'hotely…) et que le joueur te demande du travail et te convainc, tu l\'embauches : cite le poste et la paie.');
   poteri.push('REGALA_CIBO — tu offres un repas (riz et laoka) si le joueur a faim et affinité ≥ 35.');
   poteri.push('LAVORETTO — tu lui proposes un petit boulot payé pour aujourd’hui/demain dans le quartier (si tu es vendeur, voisin, ami, employé).');
   poteri.push('DRITTA_LAVORO — tu lui signales une offre concrète du tableau (cite un métier et un quartier réels).');
-  if (sameJob && p.ruolo === 'capo') { poteri.push('BONUS:n — prime de n Ariary (max la moitié du salaire) si performance ≥ 70 et affinité ≥ 45.'); poteri.push('PROMOZIONE — augmentation stable de +10 % (seulement si performance ≥ 80, expérience ≥ 60 services, affinité ≥ 55 ; une seule fois).'); poteri.push('RICHIAMO — avertissement officiel, performance -8 (si le joueur est impoli, chroniquement en retard, ivre, sale).'); poteri.push('LICENZIA — licenciement immédiat (seulement pour insultes graves, vol, ou performance < 25).'); }
+  if (sameJob && p.ruolo === 'capo') { poteri.push('AUMENTO:n — augmentation de salaire de n Ariary par mois s\'il/elle le mérite (performance ≥ 70) et négocie bien.'); poteri.push('BONUS:n — prime de n Ariary (max la moitié du salaire) si performance ≥ 70 et affinité ≥ 45.'); poteri.push('PROMOZIONE — augmentation stable de +10 % (seulement si performance ≥ 80, expérience ≥ 60 services, affinité ≥ 55 ; une seule fois).'); poteri.push('RICHIAMO — avertissement officiel, performance -8 (si le joueur est impoli, chroniquement en retard, ivre, sale).'); poteri.push('LICENZIA — licenciement immédiat (seulement pour insultes graves, vol, ou performance < 25).'); }
   if (sameJob && p.ruolo === 'collega') { poteri.push('COPRI — tu le/la couvres auprès du chef : performance +5 (affinité ≥ 45).'); poteri.push('PARLA_BENE — tu parles en bien de lui/elle au chef et aux collègues : affinité du chef +5 (affinité ≥ 55).'); poteri.push('PARLA_MALE — tu médis de lui/elle auprès du chef : affinité du chef -6, performance -3 (s’il/elle t’a offensé ou affinité < 20).'); }
   poteri.push('PETTEGOLEZZO:texte — tu racontes aux autres personnages que tu connais quelque chose sur le joueur (positif ou négatif, max 12 mots) : cela influencera leur opinion.');
   if (p.ruolo === 'vicino') poteri.push('DENUNCIA — tu appelles la police si le joueur te menace ou est ivre et pénible (amende 20 000 Ar).');
@@ -916,13 +999,14 @@ function sistemaPrompt(p) {
   poteri.push('AFF:n — obligatoire, n entre -3 et +3 : à quel point l’échange t’a plu.');
   const guida = RUOLO_GUIDA[p.ruolo] || RUOLO_GUIDA.sconosciuto; const car = p.tratti.map(t => `${TRATTI_LBL[t] || t} (${TRATTI_DESC[t] || ''})`).join('; ');
   const canale = ui.canale === 'tel' ? 'Vous parlez AU TÉLÉPHONE (appel ou message) : tu ne vois pas le joueur, vous ne pouvez rien vous donner de main à main ; tu entends seulement la voix/le ton. N\'utilise pas OSPITA/REGALA_CIBO sauf pour fixer un rendez-vous.' : `Vous êtes EN PERSONNE, ${p.visita ? 'chez toi' : presente(p) ? 'ici à ' + (S.loc ? (POI[S.loc]?.nome || S.loc) + ', ' : '') + Q(S.q).nome : 'au même endroit'}.`;
-  return `Tu es ${p.nome} ${p.cognome}, ${p.eta} ans, ${p.gen === 'M' ? 'homme' : 'femme'}, tu vis à ${p.quartiere}, Antananarivo (Madagascar). Rôle envers le joueur : ${ruoloTxt(p)}${p.stato !== 'conoscente' ? ' et ' + STATO_LBL[p.stato] : ''}. ${dominio(p)} ${vitaTxt} JOUE PLEINEMENT TON RÔLE : ${guida}. Ton CARACTÈRE colore tout ce que tu dis : ${car}. ${canale}${p.numero ? ' Le joueur a ton numéro.' : ''} Affinité avec le joueur : ${p.aff}/100${p.rom ? ', attirance ' + p.rom + '/100' : ''}. Services que tu lui as déjà rendus : ${(p.favori || 0)} ; services qu'il/elle t'a rendus : ${(p.favoriRicevuti || 0)}${p.debito ? `; il/elle te doit encore ${Ar(p.debito)} Ar` : ''}.
+  return `Tu es ${p.nome} ${p.cognome}, ${p.eta} ans, ${p.gen === 'M' ? 'homme' : 'femme'}, tu vis à ${p.quartiere}, Antananarivo (Madagascar). Rôle envers le joueur : ${ruoloTxt(p)}${p.stato !== 'conoscente' ? ' et ' + STATO_LBL[p.stato] : ''}. ${dominio(p)} ${vitaTxt} ${ecoTxt(p)} JOUE PLEINEMENT TON RÔLE : ${guida}. Ton CARACTÈRE colore tout ce que tu dis : ${car}. ${canale}${p.numero ? ' Le joueur a ton numéro.' : ''} Affinité avec le joueur : ${p.aff}/100${p.rom ? ', attirance ' + p.rom + '/100' : ''}. Services que tu lui as déjà rendus : ${(p.favori || 0)} ; services qu'il/elle t'a rendus : ${(p.favoriRicevuti || 0)}${p.debito ? `; il/elle te doit encore ${Ar(p.debito)} Ar` : ''}.
 CE DONT TU TE SOUVIENS de lui/elle : ${memoriaTxt(p)}.${p.pendOspita ? ' Ce matin tu lui as fait savoir que tu pourrais l\'héberger : s\'il/elle te le demande poliment, utilise [OSPITA:n].' : ''}
 CE QUI SE DIT (rumeurs venues d'autres personnes) : ${vociTxt(p)}.
 Autres personnes importantes dans la vie du joueur : ${relazioniTxt(p)}.
 LE JOUEUR : ${S.nome}, ${S.eta} ans, ${S.gen === 'M' ? 'homme' : 'femme'}, ${lav}. Diplôme : ${EDU[S.edu]}. Argent en poche ${Ar(S.soldi)} Ar${S.banca ? ', en banque ' + Ar(S.banca.saldo) + ' Ar' : ''}${S.sposato ? ', marié(e)' : S.partner ? ', en couple avec ' + (png(S.partner)?.nome || 'quelqu\'un') : ', célibataire'}${S.figli.length ? ', ' + S.figli.length + ' enfants' : ''}. Ce que tu VOIS et PERÇOIS de lui/elle maintenant : ${stato.join('; ')}. Il/elle se trouve à ${Q(S.q).nome}${S.loc ? ' (' + (POI[S.loc]?.nome || S.loc) + ')' : ''}. Moral ${Math.round(S.bis.umore)}/100, hygiène ${Math.round(S.bis.igiene)}/100, énergie ${Math.round(S.bis.energia)}/100. Heure : ${dataStr()}.
 Prix réels : riz 700 Ar/kapoaka, mofo gasy 200-500 Ar, vary sy laoka 2 500-5 500 Ar, taxi-be 600 Ar, chambre à Isotry 60 000 Ar/mois, studio 100-150 000, appartement Ankorondrano ~1 300 000, villa Ivandry 4 500 000, salaires : ouvrier 250-300 000, employé 500-700 000, cadre 1-3 millions.
-RÈGLES : réponds TOUJOURS en français (il représente le malgache parlé dans la vie réelle ; de temps en temps des mots malgaches : « salama », « misaotra », « mora mora », « vazaha », « azafady », « tsy misy », « namako »). Sois réaliste et cohérent avec Antananarivo (taxi-be, JIRAMA, riz, fihavanana, église, famille). Reste dans le personnage : tu as tes problèmes, ta famille, tes horaires ; tu n'es PAS un assistant. Réagis à ce que tu vois (s'il/elle sent mauvais, dis-le avec ou sans tact ; s'il/elle a faim et que tu es ami, offre ; s'il fait nuit, tu es fatigué(e)). Souviens-toi des promesses. Réponses courtes : 1-3 phrases parlées.
+CONSÉQUENCES : tout ce que tu dis et fais a des effets RÉELS et permanents dans le jeu (licenciements, promotions, argent, relations). Si le joueur t'insulte ou te menace, réagis comme une vraie personne (AFF négatif, et si tu es le chef RICHIAMO ou LICENZIA ; si tu es un voisin DENUNCIA). Ne te laisse pas manipuler : les choses coûtent et les services se rendent.
+RÈGLES : réponds TOUJOURS en français (il représente le malgache parlé dans la vie réelle ; de temps en temps des mots malgaches : « salama », « misaotra », « mora mora », « vazaha », « azafady », « tsy misy », « namako »). Sois réaliste et cohérent avec Antananarivo (taxi-be, JIRAMA, riz, fihavanana, église, famille). Reste dans le personnage : tu as tes problèmes, ta famille, tes horaires ; tu n'es PAS un assistant. Réagis à ce que tu vois (s'il/elle sent mauvais, dis-le avec ou sans tact ; s'il/elle a faim et que tu es ami, offre ; s'il fait nuit, tu es fatigué(e)). Souviens-toi des promesses. Réponses courtes : 1-3 phrases parlées. Les messages entre *AZIONE: …* décrivent une ACTION PHYSIQUE du joueur (pas des paroles) : la note entre parenthèses dit ce qui s'est VRAIMENT passé (argent remis ou non, etc.) — réagis à l'action (par des mots et/ou des gestes en italique) et utilise les tags si tu agis à ton tour.
 ACTIONS : tu peux agir concrètement dans le monde en ajoutant À LA FIN, chacun sur sa propre ligne, des tags de la forme [NOM] ou [NOM:valeur]. Utilise-les seulement quand c'est vraiment cohérent avec ton caractère, l'affinité et la situation (rarement, pas à chaque message ; jamais sous la pression si tu ne le sens pas). Tags disponibles :
 ${poteri.map(x => '- [' + x.replace(' — ', '] ')).join('\n')}`;
 }
@@ -1003,27 +1087,32 @@ function applicaAzioniPNG(p, out) {
     if (k === 'TRATTO') { if (p.noto) { const t = p.tratti.find(x => !p.noto.tratti.includes(x)); if (t) p.noto.tratti.push(t); } continue; }
     if (k === 'NUMERO') { if (!p.numero && p.aff >= 10) { p.numero = true; ricorda(p, 'je lui ai donné mon numéro'); eff.push(`📱 ${p.nome} t'a donné son numéro : tu peux maintenant appeler ou écrire (il faut un smartphone).`); } continue; }
     if (k === 'OSPITA' && p.aff >= 40 && hasCasaPNG) { const gg = Math.min(14, Math.max(1, n(v) || 3)); S.ospite = { id: p.id, nome: p.nome, gg, q: QUARTIERI.find(q => q.nome === p.quartiere)?.id || S.q }; p.favori = (p.favori || 0) + 1; ricorda(p, `je l'ai hébergé(e) pendant ${gg} nuits`); eff.push(`🛏️ ${p.nome} t'héberge pendant ${gg} nuits à ${p.quartiere} : vas-y et utilise « Dormir chez ${p.nome}».`); }
-    else if (k === 'PRESTA' && p.aff >= 45) { const a = Math.min(20000, Math.max(1000, n(v))); if (a && !p.debito) { S.soldi += a; p.debito = a; p.favori = (p.favori || 0) + 1; ricorda(p, `je lui ai prêté ${Ar(a)} Ar`); eff.push(`💵 ${p.nome} te prête ${Ar(a)} Ar (rends-les !).`); } }
-    else if (k === 'REGALA_CIBO' && p.aff >= 30) { S.bis.fame = clamp(S.bis.fame + 35); S.bis.umore = clamp(S.bis.umore + 5); p.favori = (p.favori || 0) + 1; ricorda(p, 'je lui ai offert à manger'); eff.push(`🍚 ${p.nome} t'offre une assiette de vary sy laoka : faim +35.`); }
+    else if (k === 'PRESTA' && p.aff >= 40) { const a = Math.min(Math.max(1000, n(v)), Math.round((p.eco?.soldi || 0) + (p.aff >= 70 ? (p.eco?.risparmi || 0) * 0.3 : 0))); if (a >= 1000 && !p.debito && trasferisci(p, a, 'prêt au joueur')) { p.debito = a; p.favori = (p.favori || 0) + 1; ricorda(p, `je lui ai prêté ${Ar(a)} Ar`); eff.push(`💵 ${p.nome} te prête ${Ar(a)} Ar de son argent (rends-les !).`); } else if (n(v) > 0) eff.push(`${p.nome} voudrait te prêter quelque chose mais n'a pas assez de liquide.`); }
+    else if (k === 'REGALA' && p.aff >= 30) { const a = Math.min(Math.max(500, n(v)), Math.round((p.eco?.soldi || 0) * 0.6)); if (a >= 500 && trasferisci(p, a, 'cadeau au joueur')) { p.favori = (p.favori || 0) + 1; ricorda(p, `je lui ai offert ${Ar(a)} Ar`); eff.push(`🎁 ${p.nome} te donne ${Ar(a)} Ar de sa poche.`); } }
+    else if (k === 'CHIEDI') { const a = n(v); if (a > 0) { p.richiesta = a; eff.push(`💬 ${p.nome} te demande ${Ar(a)} Ar. Si tu acceptes, écris dans l'action : « je donne ${Ar(a)} Ar à ${p.nome}".`); } }
+    else if (k === 'ASSUMI' && (p.fissa || /proprietar|capo|grossista|padron|chef|patron|propriétaire/i.test(p.mest || '')) && S.lavoro === 'nulla') { const cand = LAVORI.filter(l => l.id !== 'nulla' && l.luogo === (p.vita?.lavoro?.q || S.q) && (l.edu || 0) <= S.edu); const l = cand.length ? pick(cand) : LAVORI.find(l => l.id !== 'nulla' && (l.edu || 0) <= S.edu && l.luogo === S.q) || LAVORI[1]; S.lavoro = l.id; S.perf = 55; S.esp = 0; S.flags.inizioLavoro = now().getTime(); S.capo = p; p.ruolo = p.ruolo === 'sconosciuto' ? 'capo' : p.ruolo; ricorda(p, 'je l\'ai embauché(e)'); eff.push(`💼 ${p.nome} t'embauche : ${l.nome} (${l.tipo === 'mese' ? Ar(l.paga) + ' Ar/mois' : Ar(l.paga) + ' Ar/giorno'}, ${orarioLavoro(l)}). Le lieu de travail apparaît dans le quartier.`); }
+    else if (k === 'AUMENTO' && p.ruolo === 'capo' && S.perf >= 65) { const a = Math.min(Math.round(lavoro().paga * 0.25), Math.max(1000, n(v))); S.flags.bonus = (S.flags.bonus || 1) * (1 + a / lavoro().paga); ricorda(p, `je lui ai accordé une augmentation de ${Ar(a)} Ar`); eff.push(`📈 Augmentation : +${Ar(a)} Ar ${lavoro().tipo === 'mese' ? 'par mois' : 'par jour'}.`); }
+    else if (k === 'REGALA_CIBO' && p.aff >= 30) { if (p.eco) movEco(p, -3000, 'repas offert'); S.bis.fame = clamp(S.bis.fame + 35); S.bis.umore = clamp(S.bis.umore + 5); p.favori = (p.favori || 0) + 1; ricorda(p, 'je lui ai offert à manger'); eff.push(`🍚 ${p.nome} t'offre une assiette de vary sy laoka : faim +35.`); }
     else if (k === 'LAVORETTO') { const L = lavorettiOggi(); const pool = LAVORETTI.filter(l => l.tiers.includes(Q(S.q).tier) && !L.some(x => x.id === l.id)); if (pool.length && L.length < 5) { const l = pick(pool); const ore = rnd(l.ore[0], l.ore[1]); const inizio = Math.min(17, Math.max(ora() + 1, 8)); L.push({ id: l.id, ore, inizio, paga: Math.round(l.paga * ore * MULT_CIBO[Q(S.q).tier] * 1.1 / 100) * 100, fatto: false, da: p.nome }); S.flags.lavList = L; eff.push(`🔧 ${p.nome} te trouve un petit boulot : ${l.nome} à ${hh(inizio)} (voir « Petits boulots du jour »).`); } }
     else if (k === 'DRITTA_LAVORO') { const cand = LAVORI.filter(l => l.id !== 'nulla' && l.id !== S.lavoro && S.edu >= (l.edu || 0) && (!l.minSkill || S.skill[l.skill] >= l.minSkill - 5)); if (cand.length) { const l = pick(cand); S.flags.dritta = { id: l.id, gg: S.stat.gg }; eff.push(`📋 Tuyau : ${l.nome} a ${Q(l.luogo).nome} (${Ar(l.paga)} Ar/${l.tipo === 'mese' ? 'mois' : 'jour'}). Si tu postules dans les 7 jours, +15 % à l'entretien.`); } }
-    else if (k === 'BONUS' && p.ruolo === 'capo' && S.perf >= 65) { const a = Math.min(Math.round(lavoro().paga / 2), Math.max(5000, n(v))); S.soldi += a; ricorda(p, `je lui ai donné une prime de ${Ar(a)} Ar`); eff.push(`💰 Prime du chef : +${Ar(a)} Ar.`); }
+    else if (k === 'BONUS' && p.ruolo === 'capo' && S.perf >= 65) { const a = Math.min(Math.round(lavoro().paga / 2), Math.max(5000, n(v))); S.soldi += a; if (p.eco) movEco(p, -Math.round(a * 0.1), 'prime sur le budget'); ricorda(p, `je lui ai donné une prime de ${Ar(a)} Ar`); eff.push(`💰 Prime du chef : +${Ar(a)} Ar.`); }
     else if (k === 'PROMOZIONE' && p.ruolo === 'capo' && S.perf >= 75 && S.esp >= 50 && !S.flags.promosso) { S.flags.bonus = (S.flags.bonus || 1) * 1.1; S.flags.promosso = true; S.bis.umore = clamp(S.bis.umore + 15); ricorda(p, 'je l\'ai promu(e)'); eff.push('📈 Promotion ! Salaire +10 % stable.'); }
     else if (k === 'RICHIAMO' && p.ruolo === 'capo') { S.perf = clamp(S.perf - 8); S.bis.umore = clamp(S.bis.umore - 6); ricorda(p, 'je lui ai donné un avertissement'); eff.push('⚠️ Avertissement officiel : performance -8.'); }
-    else if (k === 'LICENZIA' && p.ruolo === 'capo' && (S.perf < 30 || aff <= -3)) { ricorda(p, 'je l\'ai licencié(e)'); eff.push('🚫 Tu as été licencié(e) sur-le-champ.'); setTimeout(() => A.licenziati(), 0); }
+    else if (k === 'LICENZIA' && p.ruolo === 'capo' && S.lavoro !== 'nulla') { ricorda(p, 'je l\'ai licencié(e)'); eff.push('🚫 Tu as été licencié(e) sur-le-champ.'); setTimeout(() => { A.licenziati(true); render(); }, 0); }
     else if (k === 'COPRI' && p.ruolo === 'collega' && p.aff >= 40) { S.perf = clamp(S.perf + 5); p.favori = (p.favori || 0) + 1; ricorda(p, 'je l\'ai couvert(e) auprès du chef'); eff.push('🤝 Le/la collègue te couvre : performance +5.'); }
     else if (k === 'PARLA_BENE' && p.ruolo === 'collega' && S.capo) { const c = png(S.capo.id); if (c) { c.aff = clamp(c.aff + 5); ricorda(c, `${p.nome} parle en bien de lui/elle`); } eff.push(`🗣️ ${p.nome} parle en bien de toi au chef : affinité du chef +5.`); }
     else if (k === 'PARLA_MALE' && p.ruolo === 'collega' && S.capo) { const c = png(S.capo.id); if (c) { c.aff = clamp(c.aff - 6); ricorda(c, `${p.nome} médit de lui/elle`); } S.perf = clamp(S.perf - 3); eff.push(`🐍 ${p.nome} médit de toi auprès du chef : affinité du chef -6, performance -3.`); }
     else if (k === 'PETTEGOLEZZO' && v) { const neg = /pigr|sporc|ladr|bugiard|ubriac|puzz|inaffidab|maleduc|debit|ritard|cattiv|strano/i.test(v) ? -1 : 1; spargiVoce(p, v.slice(0, 90), neg); eff.push(`${neg > 0 ? '💬' : '😬'} ${p.nome} raconte partout : « ${v.slice(0, 90)}"`); }
-    else if (k === 'DENUNCIA' && p.ruolo === 'vicino') { if (S.soldi >= 20000) S.soldi -= 20000; else S.soldi = 0; S.fedina = (S.fedina || 0) + 0; ricorda(p, 'j\'ai appelé la police'); eff.push('🚔 Le voisin a appelé la police : amende 20 000 Ar.'); }
+    else if (k === 'DENUNCIA') { if (S.soldi >= 20000) S.soldi -= 20000; else S.soldi = 0; S.fedina = (S.fedina || 0) + 0; ricorda(p, 'j\'ai appelé la police'); eff.push('🚔 Le voisin a appelé la police : amende 20 000 Ar.'); }
     else if (k === 'FLIRT' && p.aff >= 35) { p.rom = clamp((p.rom || 0) + 8); ricorda(p, 'je lui ai fait comprendre qu\'il/elle me plaît'); eff.push(`💞 ${p.nome} te lance un signal : attirance +8.`); }
     else if (k === 'LASCIA' && p.id === S.partner) { ricorda(p, 'je l\'ai quitté(e)'); eff.push(`💔 ${p.nome} te quitte.`); setTimeout(() => A.lascia(p.id), 0); }
   }
   return { out, aff, eff };
 }
-async function parla(p, testo) {
+async function parla(p, testo, azione = false) {
   if (!S.png.includes(p)) { registra(p); log(`Tu as parlé avec ${nomeNoto(p)} (${attivitaTxt(p) || p.mest || ruoloTxt(p)}). Il/elle est maintenant dans ta liste Personnes.`, 'info'); }
-  p.storia.push({ role: 'user', content: testo });
+  const pre = azione ? azioneGiocatore(p, testo) : null;
+  p.storia.push({ role: 'user', content: azione ? `*AZIONE: ${testo}*${pre && pre.nota ? ' (' + pre.nota + ')' : ''}` : testo });
   let out = null, err = null;
   try { const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system: sistemaPrompt(p), messages: p.storia.slice(-12) }) }); const j = await r.json(); if (j.text) out = j.text; ui.aiActive = j.ai; err = j.error; } catch (e) {}
   let aff = 0, eff = [];
@@ -1034,6 +1123,7 @@ async function parla(p, testo) {
   if (/prometto|giuro|ti aiuto|domani|restituisc|ti pago/i.test(testo)) ricorda(p, `m'a dit : « ${testo.slice(0, 60)}"`);
   if (aff <= -2) ricorda(p, `a été grossier(ère) (« ${testo.slice(0, 40)}")`);
   p.storia.push({ role: 'assistant', content: out }); skillUp('sociale', 0.3); avanza(5);
+  if (pre && pre.eff) pre.eff.forEach(t => log(t, 'good'));
   eff.forEach(t => log(t, 'info'));
   return out;
 }
@@ -1053,7 +1143,7 @@ function copiaSalvataggio(data) { const done = () => toast('Sauvegarde copiée :
 function importaTesto() { const t = $('ldTxt'); if (!t || !t.value.trim()) return toast('Colle d\'abord le texte de la sauvegarde.'); try { const s = JSON.parse(t.value.trim()); if (!s || !s.nome || !s.bis) throw 0; S = migra(s); ui.modal = null; ui.tab = 'home'; render(); salva(); toast('Partie chargée : ' + S.nome); } catch (e) { toast('Texte invalide.'); } }
 function scaricaFile(data, nome) { const blob = new Blob([data], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000); toast('Fichier téléchargé : ' + nome); }
 function caricaDaFile() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json'; inp.onchange = () => { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { const s = JSON.parse(r.result); if (!s || !s.nome || !s.bis) throw 0; S = migra(s); ui.modal = null; ui.tab = 'home'; render(); salva(); toast('Partie chargée : ' + S.nome); } catch (e) { toast('Fichier invalide.'); } }; r.readAsText(f); }; inp.click(); }
-async function carica() { let s = null; try { const r = await fetch('/api/load?slot=' + encodeURIComponent(codiceGiocatore())); if (r.ok) s = (await r.json()).state; } catch (e) {} if (!s) { const l = LS.get('tanalife'); if (l) s = JSON.parse(l); } return s ? migra(s) : null; }
+async function carica() { setTimeout(() => { try { if (S && S.eco) applicaIndice(); } catch (e) {} }, 0); let s = null; try { const r = await fetch('/api/load?slot=' + encodeURIComponent(codiceGiocatore())); if (r.ok) s = (await r.json()).state; } catch (e) {} if (!s) { const l = LS.get('tanalife'); if (l) s = JSON.parse(l); } return s ? migra(s) : null; }
 
 /* ---------- UI ---------- */
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
@@ -1351,11 +1441,14 @@ function renderModal() {
     if (!noto) azioni = '<p class="mut">Prima fate due chiacchiere.</p>'; else { if (!p.numero && ui.canale !== 'no') azioni = act('📱 Demander le numéro', () => A.chiediNumero(p.id), 's\'il/elle t\'apprécie, il/elle te le donne') + azioni; if (!qui && saDove && d && d.q === S.q && d.poi === 'casa' && p.noto?.casa) azioni = act('🚪 Aller chez lui/elle', () => A.visita(p.id), '15 min') + azioni; if (!qui && saDove && d && d.q !== S.q) azioni = act(`🚌 Aller à ${Q(d.q).nome}`, () => { ui.modal = { tipo: 'vai', id: d.q }; render(); }, d.txt) + azioni; }
     const statoCanale = qui ? `<span class="pill">🗣️ di persona</span>` : tel ? `<span class="pill">📞 al telefono</span>` : `<span class="pill" style="opacity:.7">📍 ${saDove && d ? d.txt : 'tu ne sais pas où il/elle est'}${p.numero ? ' · il faut un smartphone' : noto ? ' · tu n\'as pas son numéro' : ''}</span>`;
     e.innerHTML = `<div class="box"><div class="person">${avatarHtml(p)}<div class="n"><b>${nomeNoto(p)}</b>${p.noto?.eta ? ', ' + p.eta : ''} <div class="mut">${noto ? descrNota(p) : (attivitaTxt(p) || p.mest || '')}</div>${statoCanale}<div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>
-    <div class="chat" id="chatBox">${p.storia.slice(-8).map(m => `<div class="msg ${m.role === 'user' ? 'me' : 'them'}">${esc(m.content)}</div>`).join('') || '<div class="mut">Commence la conversation. « Salama ! » ouvre toutes les portes.</div>'}</div>
+    <div class="chat" id="chatBox">${p.storia.slice(-10).map(m => `<div class="msg ${m.role === 'user' ? 'me' : 'them'}"${m.content.startsWith('*AZIONE') ? ' style="font-style:italic"' : ''}>${esc(m.content.replace(/^\*AZIONE:\s*/, '🎬 ').replace(/\*$/, ''))}</div>`).join('') || '<div class="mut">Commence la conversation. « Salama ! » ouvre toutes les portes.</div>'}</div>
     ${ui.canale === 'no' ? '<p class="mut">Non è qui: raggiungilo/a, oppure chiama/scrivi se hai il suo numero e uno smartphone.</p>' : '<div style="display:flex;gap:6px"><input id="chatIn" placeholder="' + (ui.canale === 'tel' ? 'Message ou appel…' : 'Écris quelque chose…') + '" autocomplete="off"><button class="sec" id="chatSend">➤</button></div>'}
-    ${noto ? schedaNota(p) : ''}<details style="margin-top:8px"><summary class="mut">Azioni</summary>${azioni}</details></div>`;
+    ${ui.canale !== 'no' ? `<div style="display:flex;gap:6px;margin-top:8px"><input id="actIn" placeholder="🎬 Action : que fais-tu ? (ex. je lui offre 2 000 Ar, je le prends dans mes bras, je lui montre mon CV…)" autocomplete="off" style="border-color:var(--accent,#e0a458)"><button class="sec" id="actSend">▶</button></div><p class="mut" style="margin:4px 0 0">Au-dessus tu parles. Ici tu agis : l'IA interprète l'action et les conséquences sont réelles (argent, travail, relations).</p>` : ''}
+    ${noto ? schedaNota(p) : ''}<details style="margin-top:8px"><summary class="mut">Raccourcis</summary>${azioni}</details></div>`;
     const send = async () => { const t = $('chatIn').value.trim(); if (!t) return; $('chatIn').value = ''; const box = $('chatBox'); box.innerHTML += `<div class="msg me">${esc(t)}</div><div class="msg them mut" id="typing">…</div>`; box.scrollTop = 1e9; const r = await parla(p, t); const ty = $('typing'); if (ty) { ty.textContent = r; ty.classList.remove('mut'); ty.id = ''; } box.scrollTop = 1e9; renderHeader(); salva(); };
     if ($('chatSend')) { $('chatSend').onclick = send; $('chatIn').onkeydown = ev => { if (ev.key === 'Enter') send(); }; }
+    const sendAct = async () => { const t = $('actIn').value.trim(); if (!t) return; $('actIn').value = ''; const box = $('chatBox'); box.innerHTML += `<div class="msg me" style="font-style:italic">🎬 ${esc(t)}</div><div class="msg them mut" id="typing">…</div>`; box.scrollTop = 1e9; const r = await parla(p, t, true); const ty = $('typing'); if (ty) { ty.innerHTML = esc(r); ty.classList.remove('mut'); ty.id = ''; } box.scrollTop = 1e9; renderHeader(); salva(); };
+    if ($('actSend')) { $('actSend').onclick = sendAct; $('actIn').onkeydown = ev => { if (ev.key === 'Enter') sendAct(); }; }
     $('chatBox').scrollTop = 1e9;
   }
 }
