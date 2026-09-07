@@ -72,7 +72,9 @@ h2{font-size:18px;margin:6px 0 10px}
 .person .n{flex:1}
 .person .n b{font-size:14px}
 .heart{height:4px;background:#2a3d5c;border-radius:2px;margin-top:4px}.heart b{display:block;height:100%;background:#ff7aa2;border-radius:2px}
-.toast{position:fixed;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%);background:#000c;padding:8px 14px;border-radius:10px;font-size:13px;z-index:30;max-width:90%}
+.toast{position:fixed;top:calc(env(safe-area-inset-top) + 74px);left:50%;transform:translateX(-50%);background:#0f141df2;border:1px solid #344058;border-left:4px solid var(--blue);color:var(--txt);padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.35;z-index:30;max-width:92%;box-shadow:0 6px 24px rgba(0,0,0,.45);animation:toastin .25s ease-out}
+.toast.good{border-left-color:var(--ok)}.toast.bad{border-left-color:var(--bad)}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
 
 :root{--bg:#0e1117;--card:#161b24;--card2:#1f2733;--txt:#eef2f7;--mut:#8b96a8;--acc:#f2b632;--ok:#34d399;--bad:#f87171;--blue:#60a5fa;--rad:16px}
 header{background:rgba(14,17,23,.85);backdrop-filter:blur(12px);border-bottom:1px solid #1f2733}
