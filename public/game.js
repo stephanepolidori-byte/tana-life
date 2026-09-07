@@ -989,7 +989,7 @@ function vPersone() {
   if (S.figli.length) h += `<div class="card"><h3>Figli</h3>${S.figli.map(f => `<div class="row"><span>${f.gen === 'M' ? '👦' : '👧'} ${f.nome}</span><span class="mut">${f.eta} anni</span></div>`).join('')}</div>`;
   if (S.gravidanza) h += `<div class="card">🤰 Bambino in arrivo tra ${S.gravidanza.gg} giorni.</div>`;
   const ord = [...S.png].sort((a, b) => (b.id === S.partner) - (a.id === S.partner) || b.aff - a.aff);
-  h += '<div class="card">' + ord.map(p => `<div class="person" onclick="apriChat('${p.id}')"><div class="avatar">${p.gen === 'M' ? '👨' : '👩'}</div><div class="n"><b>${p.nome} ${p.cognome}</b> <span class="mut">${p.eta}</span><div class="mut">${ruoloTxt(p)}${p.stato !== 'conoscente' ? ' · ' + STATO_LBL[p.stato] : ''} · ${trattiTxt(p)}</div><div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>`).join('') + '</div>';
+  h += '<div class="card">' + ord.map(p => `<div class="person" onclick="apriChat('${p.id}')">${avatarHtml(p)}<div class="n"><b>${p.nome} ${p.cognome}</b> <span class="mut">${p.eta}</span><div class="mut">${ruoloTxt(p)}${p.stato !== 'conoscente' ? ' · ' + STATO_LBL[p.stato] : ''} · ${trattiTxt(p)}</div><div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>`).join('') + '</div>';
   return h;
 }
 function vMe() {
@@ -1005,6 +1005,9 @@ async function caricaImpostazioni() { try { const j = await (await fetch('/api/s
 async function salvaImpostazioni() { const b = { provider: $('sProv').value, model: $('sModel').value, openaiKey: $('sOpenai').value, anthropicKey: $('sAnth').value, adminKey: $('sAdmin') ? $('sAdmin').value : '' }; try { const j = await (await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })).json(); toast('AI: ' + (j.active === 'none' ? 'motore interno' : j.active)); } catch (e) { toast('Errore salvataggio'); } }
 
 /* ---------- MODALI ---------- */
+// Ritratto cartoon del PNG: scelto per genere ed età, stabile per id.
+function ritratto(p) { const g = p.gen === 'M' ? 'm' : 'f'; const pool = p.eta < 30 ? [1, 2] : p.eta < 55 ? [3, 4] : [5]; let hsh = 0; for (const ch of String(p.id)) hsh = (hsh * 31 + ch.charCodeAt(0)) >>> 0; return `${ART_BASE}n/${g}${pool[hsh % pool.length]}.webp`; }
+function avatarHtml(p) { return `<div class="avatar"><img src="${ritratto(p)}" alt="" onerror="this.remove()"><span>${p.gen === 'M' ? '👨' : '👩'}</span></div>`; }
 function apriChat(id) { ui.modal = { tipo: 'chat', id }; render(); }
 function renderModal() {
   let e = document.querySelector('.modal'); if (e) e.remove(); if (!ui.modal) return;
@@ -1088,7 +1091,7 @@ function renderModal() {
     if (p.comp === ga) azioni += act('🎂 Festeggia il suo compleanno', () => A.compleannoPNG(p.id), '3h · 20.000 Ar · affinità +12');
     if (romantic && !S.partner && p.stato === 'conoscente') azioni += act('💕 Chiedi di fidanzarvi', () => conferma('💕 Dichiararti?', `Chiedi a <b>${p.nome}</b> di fidanzarvi. Se rifiuta perdi 10 di affinità.`, () => A.fidanzati(p.id), 'Dichiarati'), `affinità ${p.aff} (serve 55) · attrazione ${p.rom || 0} (serve 25)`);
     if (p.id === S.partner) { if (p.stato === 'fidanzato') azioni += act('💍 Proposta di matrimonio', () => conferma('💍 Chiedere la mano?', `Anello: <b>200.000 Ar</b>. Poi il matrimonio si celebra al Comune (Anosy).`, () => A.proponi(p.id), 'Proponi'), 'anello 200.000 Ar'); if (p.stato === 'promesso') azioni += '<p class="mut">Vai al Comune (Anosy) per celebrare il matrimonio.</p>'; if (['sposato', 'fidanzato'].includes(p.stato)) azioni += act('👶 Provate ad avere un figlio', () => conferma('👶 Un figlio?', `Con ${p.nome}. Un bambino costa ~60.000 Ar/mese e nasce dopo 9 mesi. Probabilità 50%.`, () => A.figlio(p.id), 'Proviamo')); azioni += act('💔 Lascia', () => conferma('💔 Lasciare ' + p.nome + '?', S.sposato ? '<b>Divorzio:</b> perdi metà dei risparmi in banca e umore -20.' : 'Umore -20. Non si torna indietro facilmente.', () => A.lascia(p.id), 'Lascio')); }
-    e.innerHTML = `<div class="box"><div class="person"><div class="avatar">${p.gen === 'M' ? '👨' : '👩'}</div><div class="n"><b>${p.nome} ${p.cognome}</b>, ${p.eta} <div class="mut">${ruoloTxt(p)} · ${p.quartiere} · ${trattiTxt(p)}</div><div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>
+    e.innerHTML = `<div class="box"><div class="person">${avatarHtml(p)}<div class="n"><b>${p.nome} ${p.cognome}</b>, ${p.eta} <div class="mut">${ruoloTxt(p)} · ${p.quartiere} · ${trattiTxt(p)}</div><div class="heart"><b style="width:${p.aff}%"></b></div></div><span class="mut">${p.aff}</span></div>
     <div class="chat" id="chatBox">${p.storia.slice(-8).map(m => `<div class="msg ${m.role === 'user' ? 'me' : 'them'}">${esc(m.content)}</div>`).join('') || '<div class="mut">Inizia tu la conversazione. "Salama!" apre tutte le porte.</div>'}</div>
     <div style="display:flex;gap:6px"><input id="chatIn" placeholder="Scrivi qualcosa…" autocomplete="off"><button class="sec" id="chatSend">➤</button></div>
     <details style="margin-top:8px"><summary class="mut">Azioni con ${p.nome}</summary>${azioni}</details></div>`;
