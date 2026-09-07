@@ -65,7 +65,7 @@ async function callProvider(p, system, messages) {
       lastErr = new Error(j.error?.message || 'Gemini error'); lastErr.status = r.status;
       if (r.status === 404 || /no longer available|not found|not supported/i.test(lastErr.message)) { geminiCache = null; geminiGood = null; break; } // modello ritirato: prova il prossimo
       if (r.status === 429 || r.status === 503) { geminiGood = null; break; } // sovraccarico/quota: prova un altro modello
-      if (r.status === 400 && noThink && /thinking/i.test(lastErr.message)) continue; // modello senza thinkingConfig: riprova senza
+      if (r.status === 400 && noThink) continue; // modello senza thinkingConfig: riprova senza
       throw lastErr;
     }
     throw lastErr || new Error('Nessun modello Gemini disponibile');
