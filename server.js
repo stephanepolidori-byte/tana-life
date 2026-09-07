@@ -78,6 +78,10 @@ const server = http.createServer(async (req, res) => {
       fs.writeFileSync(path.join(SAVE_DIR, safeId(b.slot) + '.json'), JSON.stringify(b.state));
       return json(res, 200, { ok: true });
     }
+    if (url.pathname === '/api/delete' && req.method === 'POST') {
+      const b = await body(req); const f = path.join(SAVE_DIR, safeId(b.slot) + '.json'); if (fs.existsSync(f)) fs.unlinkSync(f);
+      return json(res, 200, { ok: true });
+    }
     if (url.pathname === '/api/load') {
       const f = path.join(SAVE_DIR, safeId(url.searchParams.get('slot')) + '.json');
       if (!fs.existsSync(f)) return json(res, 404, { error: 'no save' });

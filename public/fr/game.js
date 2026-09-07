@@ -526,7 +526,8 @@ function eventoCasuale() {
   else if (r < 0.125 && ha('telefono') && S.flags.rep && Object.keys(S.flags.rep).length) { const qid = pick(Object.keys(S.flags.rep)); log(`📱 Une connaissance de ${Q(qid).nome} t'a appelé(e) : demain on cherche du monde pour un petit boulot. Passe par là.`, 'info'); }
   else if (r < 0.13) { const v = rnd(2000, 15000); S.soldi += v; log(`Tu as trouvé ${Ar(v)} Ar par terre !`, 'good'); }
 }
-function morte() { ui.modal = { tipo: 'morte' }; render(); }
+function morte() { if (S.morto) return; S.morto = true; S.bis.salute = 0; ui.modal = { tipo: 'morte' }; render(); salva(); }
+async function nuovaVita() { const slot = codiceGiocatore(); S = null; ui.modal = null; ui.tab = 'home'; LS.del('tanalife'); LS.set('mrls_pid', nuovoCodice()); render(); try { await fetch('/api/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slot }) }); } catch (e) { } }
 function paga(n, auto = false) {
   if (S.soldi >= n) { S.soldi -= n; return true; }
   if (auto && S.banca && S.banca.saldo + S.soldi >= n) { const m = n - S.soldi; S.banca.saldo -= m; S.soldi = 0; log(`Prélèvement automatique de ${Ar(m)} Ar sur le compte.`, 'info'); return true; }
@@ -823,7 +824,7 @@ function renderHeader() {
   $('bars').innerHTML = Object.entries(S.bis).map(([k, v]) => `<div class="bar ${v < 25 ? 'low' : ''}">${ic[k]} ${Math.round(v)}<i><b style="width:${v}%"></b></i></div>`).join('');
 }
 function renderNav() { const tabs = [['home', '📍', 'Ici'], ['citta', '🗺️', 'Ville'], ['persone', '👥', 'Gens'], ['me', '🧍', 'Moi'], ['diario', '📜', 'Journal']]; $('nav').innerHTML = tabs.map(t => `<button class="${ui.tab === t[0] ? 'on' : ''}" onclick="ui.tab='${t[0]}';render()"><span>${t[1]}</span>${t[2]}</button>`).join(''); }
-function render() { clearTimeout(ui.cineT); if (!S) return renderIntro(); document.body.classList.remove('start', 'intro'); renderHeader(); renderNav(); $('main').innerHTML = ({ home: vHome, citta: vCitta, persone: vPersone, me: vMe, diario: vDiario })[ui.tab](); renderModal(); }
+function render() { clearTimeout(ui.cineT); if (!S) return renderIntro(); if (S.morto && (!ui.modal || ui.modal.tipo !== 'morte')) ui.modal = { tipo: 'morte' }; document.body.classList.remove('start', 'intro'); renderHeader(); renderNav(); $('main').innerHTML = ({ home: vHome, citta: vCitta, persone: vPersone, me: vMe, diario: vDiario })[ui.tab](); renderModal(); }
 const AVATARS = [
   { id: 'a1', nome: 'Andry', gen: 'M', desc: 'Déterminé, il vient des collines' },
   { id: 'a2', nome: 'Miora', gen: 'F', desc: 'Solaire, elle n\'abandonne jamais' },
@@ -879,7 +880,7 @@ function renderCinematic() {
   const v = $('cVid'), tx = $('cText'); let shown = -1;
   const show = i => { if (i === shown) return; shown = i; const sl = INTRO_SLIDES[i]; tx.className = 'ctext'; void tx.offsetWidth; tx.className = 'ctext in'; tx.innerHTML = `<h1>${sl.t}</h1>${sl.s ? `<p>${sl.s}</p>` : ''}${sl.last ? `<div class="cta"><button class="pri" id="cGo">Oui, je tente</button></div>` : ''}`; const g = $('cGo'); if (g) g.onclick = e => { e.stopPropagation(); fine(); }; };
   const tick = t => { let i = 0; INTRO_SLIDES.forEach((sl, k) => { if (t >= sl.at) i = k; }); if (t >= INTRO_SLIDES[0].at) show(i); };
-  if (v) { v.ontimeupdate = () => tick(v.currentTime); v.onended = () => show(INTRO_SLIDES.length - 1); v.onerror = () => { show(INTRO_SLIDES.length - 1); }; const p = v.play(); if (p && p.catch) p.catch(() => { }); }
+  if (v) { v.ontimeupdate = () => tick(v.currentTime); v.onended = () => show(INTRO_SLIDES.length - 1); v.onerror = () => { show(INTRO_SLIDES.length - 1); }; const p = v.play && v.play(); if (p && p.catch) p.catch(() => { }); }
   // fallback se il video non parte (autoplay bloccato): timer
   const t0 = Date.now(); ui.cineT = setTimeout(function loop() { if (S || ui.introDone) return; if (!v || v.paused || v.currentTime === 0) tick((Date.now() - t0) / 1000); if ((Date.now() - t0) / 1000 < 30) ui.cineT = setTimeout(loop, 500); }, 500);
   const k = $('cSkip'); if (k) k.onclick = e => { e.stopPropagation(); fine(); };
@@ -994,7 +995,7 @@ function vMe() {
   h += `<div class="card"><h3>Compétences</h3>${Object.entries(S.skill).map(([k, v]) => `<div class="row"><span style="text-transform:capitalize">${SKILL_LBL[k]}</span><span class="mut">${Math.round(v)}</span></div>`).join('')}</div>`;
   h += `<div class="card"><h3>Ce que tu possèdes</h3><div>${S.mobili.map(id => { const m = MOBILI.find(x => x.id === id); return m ? `<span class="tag">${m.icon} ${m.nome}</span>` : ''; }).join('') || '<span class="mut">Rien.</span>'}</div><div style="margin-top:6px">${S.veicoli.map(id => { const v = VEICOLI.find(x => x.id === id); return `<span class="tag">${v.icon} ${v.nome}</span>`; }).join('')}</div><p class="mut">Garde-manger : ${Object.entries(S.disp).filter(([k, v]) => v > 0).map(([k, v]) => `${NOMI_DISP[k]} ${v}`).join(', ') || 'vide'}. Linge : ${S.pantoPuliti} propres / ${S.pantoSporchi} sales / ${S.pantoBagnati} étendus. Médicaments : ${Object.entries(S.medicine).filter(([k, v]) => v > 0).map(([k, v]) => MEDICINE.find(m => m.id === k).nome + ' x' + v).join(', ') || 'aucun'}</p></div>`;
   h += `<div class="card"><h3>⚙️ Réglages IA</h3><p class="mut">Fournisseur actif : <b id="aiStato">…</b>. Saisis une clé OpenAI ou Anthropic pour faire parler les personnages avec la vraie IA.</p><select id="sProv"><option value="auto">Automatique</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option></select><input id="sOpenai" placeholder="Clé API OpenAI (sk-…)"><input id="sAnth" placeholder="Clé API Anthropic (sk-ant-…)"><input id="sModel" placeholder="Modèle (optionnel, ex. gpt-4o-mini)"><input id="sAdmin" type="password" placeholder="Clé administrateur (seulement si le serveur en ligne l'exige)">${btn('Enregistrer les réglages', salvaImpostazioni, 'sec')}</div>`;
-  h += `<div class="card"><h3>Sauvegardes</h3><p class="mut">La partie se sauvegarde toute seule. Tu peux aussi l'exporter dans un fichier et la recharger depuis un fichier.</p><p class="mut" style="font-size:13px">Ton code de partie : <b style="font-size:16px;letter-spacing:.06em">${codiceGiocatore()}</b><br>Note-le : sur un autre téléphone, il suffit de le saisir sur l'écran d'accueil pour reprendre la partie.</p>${btn('💾 Sauvegarder dans un fichier…', salvaSuFile, 'sec')} ${btn('📂 Charger depuis un fichier…', () => { ui.modal = { tipo: 'caricafile' }; }, 'sec')} ${btn('🗑️ Nouvelle vie (tout effacer)', () => conferma('🗑️ Effacer la partie ?', `Tu perds <b>${S.nome}</b>, ${S.stat.gg} jours de vie et tout ton patrimoine. Irréversible.`, () => { S = null; LS.del('tanalife'); render(); }, 'Tout effacer'), 'sec')}</div>`;
+  h += `<div class="card"><h3>Sauvegardes</h3><p class="mut">La partie se sauvegarde toute seule. Tu peux aussi l'exporter dans un fichier et la recharger depuis un fichier.</p><p class="mut" style="font-size:13px">Ton code de partie : <b style="font-size:16px;letter-spacing:.06em">${codiceGiocatore()}</b><br>Note-le : sur un autre téléphone, il suffit de le saisir sur l'écran d'accueil pour reprendre la partie.</p>${btn('💾 Sauvegarder dans un fichier…', salvaSuFile, 'sec')} ${btn('📂 Charger depuis un fichier…', () => { ui.modal = { tipo: 'caricafile' }; }, 'sec')} ${btn('🗑️ Nouvelle vie (tout effacer)', () => conferma('🗑️ Effacer la partie ?', `Tu perds <b>${S.nome}</b>, ${S.stat.gg} jours de vie et tout ton patrimoine. Irréversible.`, nuovaVita, 'Tout effacer'), 'sec')}</div>`;
   setTimeout(caricaImpostazioni); return h;
 }
 function vDiario() { return `<h2>📜 Journal</h2><div class="card log">${S.log.map(e => `<div class="${e.tipo}"><span class="mut">${e.d}</span> · ${esc(e.t)}</div>`).join('')}</div>`; }
@@ -1006,7 +1007,7 @@ function apriChat(id) { ui.modal = { tipo: 'chat', id }; render(); }
 function renderModal() {
   let e = document.querySelector('.modal'); if (e) e.remove(); if (!ui.modal) return;
   e = document.createElement('div'); e.className = 'modal'; document.body.appendChild(e);
-  e.addEventListener('click', ev => { if (ev.target === e) { ui.modal = null; render(); } });
+  e.addEventListener('click', ev => { if (ev.target === e && ui.modal && ui.modal.tipo !== 'morte') { ui.modal = null; render(); } });
   const M = ui.modal;
   if (M.tipo === 'vai') {
     const q = Q(M.id); const v = S.veicolo && VEICOLI.find(x => x.id === S.veicolo); const lav = lavoro();
@@ -1077,7 +1078,7 @@ function renderModal() {
     h += `<h3 style="margin-top:8px">Durée précise</h3><div style="display:flex;gap:6px"><input id="dH" type="number" min="0" placeholder="heures" inputmode="numeric" style="width:50%"><input id="dM" type="number" min="0" max="59" placeholder="min" inputmode="numeric" style="width:50%"></div>${btn('Attendre cette durée', () => { const m = (+$('dH').value || 0) * 60 + (+$('dM').value || 0); if (m <= 0) return toast('Saisis une durée.'); A.aspetta(m); ui.modal = null; }, 'sec')}</div>`;
     e.innerHTML = h; return;
   }
-  if (M.tipo === 'morte') { e.innerHTML = `<div class="box"><h3>☠️ Tu es mort(e)</h3><p>Ta vie à Antananarivo s'est terminée à ${S.eta} ans après ${S.stat.gg} jours. Patrimoine final : ${Ar(S.soldi + (S.banca?.saldo || 0))} Ar.</p>${btn('Nouvelle vie', () => { S = null; LS.del('tanalife'); ui.modal = null; })}</div>`; return; }
+  if (M.tipo === 'morte') { e.onclick = null; e.innerHTML = `<div class="box" style="border-top:4px solid var(--bad)"><h3>☠️ Tu es mort(e)</h3><p>Ta vie à Antananarivo s'est terminée à ${S.eta} ans après ${S.stat.gg} jours. Patrimoine final : ${Ar(S.soldi + (S.banca?.saldo || 0))} Ar.</p><button class="pri" id="bNuovaVita" style="width:100%">🌅 Nouvelle vie</button></div>`; const nb = $('bNuovaVita'); if (nb) nb.onclick = ev => { ev.stopPropagation(); nuovaVita(); }; return; }
   if (M.tipo === 'chat') {
     const p = png(M.id); if (!p) { ui.modal = null; return; }
     const romantic = p.eta >= 18 && !['capo', 'poliziotto', 'medico', 'professore', 'bancario'].includes(p.ruolo); const ga = giornoAnno(now());
