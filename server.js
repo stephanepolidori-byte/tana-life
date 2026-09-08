@@ -26,12 +26,13 @@ function safeId(s) { return String(s || 'default').toUpperCase().replace(/[^A-Z0
 
 // ---------- AI ----------
 function providers() {
-  const all = [['gemini', settings.geminiKey], ['groq', settings.groqKey], ['openai', settings.openaiKey], ['anthropic', settings.anthropicKey]].filter(x => x[1]).map(x => x[0]);
+  // Priorità automatica: Claude (qualità) → OpenAI → Gemini/Groq (gratuiti, riserva)
+  const all = [['anthropic', settings.anthropicKey], ['openai', settings.openaiKey], ['gemini', settings.geminiKey], ['groq', settings.groqKey]].filter(x => x[1]).map(x => x[0]);
   if (settings.provider && settings.provider !== 'auto') return all.includes(settings.provider) ? [settings.provider, ...all.filter(p => p !== settings.provider)] : all;
   return all; // auto: prima i gratuiti (Gemini, Groq), poi gli altri
 }
 function activeProvider() { return providers()[0] || 'none'; }
-let geminiCache = null, geminiGood = null;
+let geminiCache = null, geminiGood = null, anthropicGood = null;
 async function geminiModels() {
   if (geminiCache && geminiCache.t > Date.now() - 6 * 3600e3) return geminiGood ? [geminiGood, ...geminiCache.list.filter(m => m !== geminiGood)] : geminiCache.list;
   const fallback = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.0-flash'];
@@ -90,13 +91,22 @@ async function callProvider(p, system, messages) {
     return j.choices[0].message.content.trim();
   }
   if (p === 'anthropic') {
+    const models = settings.provider === 'anthropic' && settings.model ? [settings.model] : [process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-haiku-4-5', 'claude-3-5-haiku-latest'];
+    let lastErr = null;
+    for (const model of models) {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': settings.anthropicKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: (settings.provider === 'anthropic' && settings.model) || 'claude-3-5-haiku-latest', max_tokens: 350, system, messages })
+      body: JSON.stringify({ model, max_tokens: 400, temperature: 0.9,
+        system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }], // prompt caching: la parte fissa costa il 90% in meno
+        messages })
     });
     const j = await r.json();
-    if (!r.ok) { const e = new Error(j.error?.message || 'Anthropic error'); e.status = r.status; throw e; }
-    return j.content.map(c => c.text || '').join('').trim();
+    if (r.ok) { anthropicGood = model; return j.content.map(c => c.text || '').join('').trim(); }
+    lastErr = new Error(j.error?.message || 'Anthropic error'); lastErr.status = r.status;
+    if (r.status === 404 || /not_found|model/i.test(j.error?.type || '')) continue; // modello non disponibile: prova il successivo
+    throw lastErr;
+    }
+    throw lastErr || new Error('Nessun modello Claude disponibile');
   }
   return null;
 }
@@ -115,7 +125,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (req.method === 'OPTIONS') return json(res, 200, {});
   try {
-    if (url.pathname === '/api/health') return json(res, 200, { ok: true, ai: activeProvider(), model: geminiGood || null });
+    if (url.pathname === '/api/health') return json(res, 200, { ok: true, ai: activeProvider(), model: activeProvider() === 'anthropic' ? anthropicGood : geminiGood || null });
 
     if (url.pathname === '/api/settings' && req.method === 'GET')
       return json(res, 200, { provider: settings.provider, model: settings.model, hasGemini: !!settings.geminiKey, hasGroq: !!settings.groqKey, hasOpenai: !!settings.openaiKey, hasAnthropic: !!settings.anthropicKey, active: activeProvider() });
